@@ -51,12 +51,12 @@ import {
 
 const navItems = [
   { label: "Home", href: "#home" },
-  { label: "About the MP", href: "#about" },
+  { label: "About", href: "#about" },
   { label: "Projects", href: "#projects" },
   { label: "News", href: "#news" },
   { label: "Events", href: "#events" },
   { label: "Gallery", href: "#gallery" },
-  { label: "Community Impact", href: "#impact" },
+  { label: "Impact", href: "#impact" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -180,10 +180,7 @@ export default function ConstituencyPortal() {
             </span>
             <span className="leading-tight">
               <span className="block text-sm font-bold text-[var(--foreground)]">
-                Hon. Ama Serwaa Mensah
-              </span>
-              <span className="block text-xs text-[var(--muted)]">
-                Anidaso North Constituency
+                Hon. Issah Taylor Sheik
               </span>
             </span>
           </a>
@@ -211,27 +208,7 @@ export default function ConstituencyPortal() {
                 className="w-full bg-transparent text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none"
               />
             </label>
-            <a
-              href="#contact"
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:bg-[var(--primary-strong)]"
-            >
-              <HandCoins size={17} aria-hidden="true" />
-              Donate / Support
-            </a>
-            <label className="grid h-11 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-3">
-              <span className="sr-only">Language selector</span>
-              <span className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
-                <Languages size={16} aria-hidden="true" />
-                <select
-                  aria-label="Language selector"
-                  className="bg-transparent text-sm focus:outline-none"
-                >
-                  <option>EN</option>
-                  <option>TWI</option>
-                  <option>GA</option>
-                </select>
-              </span>
-            </label>
+           
             <button
               type="button"
               onClick={() => setDarkMode((current) => !current)}
@@ -277,14 +254,14 @@ export default function ConstituencyPortal() {
           className="hero-scrim relative isolate min-h-[760px] overflow-hidden pt-20 text-white"
         >
           <Image
-            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2200&q=85"
-            alt="Modern civic infrastructure and city development"
+            src="/bg sheik.jpg"
+            alt="MP with team picture"
             fill
             priority
             sizes="100vw"
             className="object-cover"
           />
-          <div className="hero-pattern absolute inset-0 z-[2] opacity-50" aria-hidden="true" />
+          {/* <div className="hero-pattern absolute inset-0 z-[2] opacity-50" aria-hidden="true" /> */}
           <div className="relative z-[3] mx-auto flex min-h-[680px] max-w-7xl flex-col justify-center px-4 py-14 sm:px-6 lg:px-8">
             <div className="max-w-3xl reveal-up">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-4 py-2 text-sm font-semibold backdrop-blur">
@@ -316,14 +293,14 @@ export default function ConstituencyPortal() {
               </div>
             </div>
 
-            <div className="mt-12 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-12 grid max-w-4xl  gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {heroStats.map((stat, index) => (
                 <div
                   key={stat.label}
-                  className={`glass-panel floating-action p-4 text-white delay-${Math.min(index, 3)}`}
+                  className={`floating-action rounded-lg border border-white/20 bg-white/10 p-4 backdrop-blur-md delay-${Math.min(index, 3)}`}
                 >
-                  <div className="text-2xl font-black">{stat.value}</div>
-                  <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/72">
+                  <div className="text-2xl font-black text-white">{stat.value}</div>
+                  <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
                     {stat.label}
                   </div>
                 </div>
@@ -336,8 +313,8 @@ export default function ConstituencyPortal() {
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div className="relative min-h-[560px] overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-[var(--shadow)]">
               <Image
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1100&q=85"
-                alt="Professional portrait of Hon. Ama Serwaa Mensah"
+                src="/sheik mp.jpg"
+                alt="Professional portrait of Hon. Issah Taylor Sheik"
                 fill
                 sizes="(min-width: 1024px) 42vw, 100vw"
                 className="object-cover"
@@ -346,7 +323,7 @@ export default function ConstituencyPortal() {
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">
                   Member of Parliament
                 </p>
-                <h2 className="mt-2 text-2xl font-black">Hon. Ama Serwaa Mensah</h2>
+                <h2 className="mt-2 text-2xl font-black">Hon. Issah Taylor Sheik</h2>
                 <p className="mt-2 text-sm leading-6 text-white/78">
                   10 years of public service, constituency advocacy, and
                   results-focused development leadership.
@@ -362,7 +339,7 @@ export default function ConstituencyPortal() {
                 Public leadership with measurable delivery.
               </h2>
               <p className="mt-5 text-base leading-8 text-[var(--muted)]">
-                Hon. Ama Serwaa Mensah represents Anidaso North with a focus on
+                Hon. Issah Taylor Sheik represents Anidaso North with a focus on
                 transparent project delivery, youth opportunity, health access,
                 education quality, and resilient local infrastructure.
               </p>
@@ -1173,7 +1150,7 @@ export default function ConstituencyPortal() {
           ))}
         </div>
         <div className="border-t border-[var(--line)] px-4 py-6 text-center text-xs font-semibold text-[var(--muted)]">
-          Copyright 2026 Office of Hon. Ama Serwaa Mensah. All rights reserved.
+          Copyright 2026 Office of Hon. Issah Taylor Sheik. All rights reserved.
         </div>
       </footer>
 

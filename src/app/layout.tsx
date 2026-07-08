@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hon. Ama Serwaa Mensah | Constituency Project Portal",
+  title: "Hon. Issah Taylor Sheik | Constituency Project Portal",
   description:
     "A transparent MP portfolio and constituency project portal for tracking public service, projects, news, events, and community impact.",
 };

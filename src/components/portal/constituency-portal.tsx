@@ -180,7 +180,7 @@ export default function ConstituencyPortal() {
             </span>
             <span className="leading-tight">
               <span className="block text-sm font-bold text-[var(--foreground)]">
-                Hon. Issah Taylor Sheik
+                 Hon. Issah Salifu Taylor 
               </span>
             </span>
           </a>
@@ -314,7 +314,7 @@ export default function ConstituencyPortal() {
             <div className="relative min-h-[560px] overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-[var(--shadow)]">
               <Image
                 src="/sheik mp.jpg"
-                alt="Professional portrait of Hon. Issah Taylor Sheik"
+                alt="Professional portrait of  Hon. Issah Salifu Taylor "
                 fill
                 sizes="(min-width: 1024px) 42vw, 100vw"
                 className="object-cover"
@@ -323,7 +323,7 @@ export default function ConstituencyPortal() {
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">
                   Member of Parliament
                 </p>
-                <h2 className="mt-2 text-2xl font-black">Hon. Issah Taylor Sheik</h2>
+                <h2 className="mt-2 text-2xl font-black"> Hon. Issah Salifu Taylor </h2>
                 <p className="mt-2 text-sm leading-6 text-white/78">
                   10 years of public service, constituency advocacy, and
                   results-focused development leadership.
@@ -339,7 +339,7 @@ export default function ConstituencyPortal() {
                 Public leadership with measurable delivery.
               </h2>
               <p className="mt-5 text-base leading-8 text-[var(--muted)]">
-                Hon. Issah Taylor Sheik represents Anidaso North with a focus on
+                 Hon. Issah Salifu Taylor  represents Tarkwa Nsuaem with a focus on
                 transparent project delivery, youth opportunity, health access,
                 education quality, and resilient local infrastructure.
               </p>
@@ -392,7 +392,7 @@ export default function ConstituencyPortal() {
           </div>
         </section>
 
-        <section className="soft-grid border-y border-[var(--line)] bg-[var(--surface)] py-20">
+        <section className=" border-y border-[var(--line)] bg-[var(--surface)] py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>
@@ -403,10 +403,6 @@ export default function ConstituencyPortal() {
                   A public dashboard for delivery.
                 </h2>
               </div>
-              <p className="max-w-xl text-sm leading-7 text-[var(--muted)]">
-                Summary indicators connect project status, budget confidence,
-                community reach, and service outcomes in one place.
-              </p>
             </div>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -1051,7 +1047,7 @@ export default function ConstituencyPortal() {
             </h2>
             <div className="mt-8 grid gap-4">
               {[
-                { icon: MapPin, label: "Office Address", value: "Civic Center Road, Anidaso North" },
+                { icon: MapPin, label: "Office Address", value: "Civic Center Road, Tarkwa Nsuaem" },
                 { icon: Phone, label: "Phone", value: "+233 30 000 2040" },
                 { icon: Mail, label: "Email", value: "office@anidasonorth.gov.gh" },
                 { icon: Clock, label: "Office Hours", value: "Mon-Fri, 8:30 AM - 5:00 PM" },
@@ -1123,7 +1119,7 @@ export default function ConstituencyPortal() {
                 <Building2 size={22} aria-hidden="true" />
               </span>
               <div>
-                <div className="font-black text-[var(--foreground)]">Anidaso North</div>
+                <div className="font-black text-[var(--foreground)]">Tarkwa Nsuaem</div>
                 <div className="text-xs font-semibold text-[var(--muted)]">MP Portfolio & Project Portal</div>
               </div>
             </div>
@@ -1150,7 +1146,7 @@ export default function ConstituencyPortal() {
           ))}
         </div>
         <div className="border-t border-[var(--line)] px-4 py-6 text-center text-xs font-semibold text-[var(--muted)]">
-          Copyright 2026 Office of Hon. Issah Taylor Sheik. All rights reserved.
+          Copyright 2026 Office of  Hon. Issah Salifu Taylor . All rights reserved.
         </div>
       </footer>
 

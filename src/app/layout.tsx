@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hon. Issah Taylor Sheik | Constituency Project Portal",
+  title: " Hon. Issah Salifu Taylor  | Constituency Project Portal",
   description:
     "A transparent MP portfolio and constituency project portal for tracking public service, projects, news, events, and community impact.",
 };
@@ -29,7 +29,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${sora.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full" suppressHydrationWarning>{children}</body>
     </html>
   );
 }

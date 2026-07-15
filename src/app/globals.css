@@ -358,3 +358,29 @@ html[data-theme="dark"] .status-archived {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Admin Panel ──────────────────────────────────────────────────────── */
+.admin-shell {
+  font-family: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+}
+
+.admin-sidebar {
+  transition: background 220ms ease;
+}
+
+/* Input accent colour for checkboxes in forms */
+[data-admin] input[type="checkbox"] {
+  accent-color: var(--primary);
+}
+
+/* Smooth table row transitions */
+[data-admin] tbody tr {
+  transition: background 120ms ease;
+}
+
+/* Admin form card inner inputs get soft focus ring */
+[data-admin] input:focus,
+[data-admin] select:focus,
+[data-admin] textarea:focus {
+  outline: none;
+}

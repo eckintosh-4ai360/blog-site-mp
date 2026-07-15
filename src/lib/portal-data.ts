@@ -85,7 +85,7 @@ export const projects: Project[] = [
     year: "2025",
     progress: 100,
     image:
-      "/bg sheik.jpg",
+      "/bg_sheik.jpg",
     beforeImage:
       "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1400&q=80",
     afterImage:

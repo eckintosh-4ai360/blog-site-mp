@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { safeImageSrc } from "@/lib/image-helper";
 
 type BeforeAfterSliderProps = {
   beforeImage: string;
@@ -19,7 +20,7 @@ export default function BeforeAfterSlider({
   return (
     <div className="comparison-frame aspect-[16/10]">
       <Image
-        src={beforeImage}
+        src={safeImageSrc(beforeImage)}
         alt={`${title} before intervention`}
         fill
         sizes="(min-width: 1024px) 58vw, 100vw"
@@ -27,7 +28,7 @@ export default function BeforeAfterSlider({
       />
       <div className="comparison-after" style={{ width: `${value}%` }}>
         <Image
-          src={afterImage}
+          src={safeImageSrc(afterImage)}
           alt={`${title} after intervention`}
           fill
           sizes="(min-width: 1024px) 58vw, 100vw"

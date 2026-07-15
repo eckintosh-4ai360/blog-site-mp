@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { safeImageSrc } from "@/lib/image-helper";
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -13,7 +14,6 @@ import {
   Circle,
   Clock,
   Download,
-  ExternalLink,
   Folder,
   HandCoins,
   HeartHandshake,
@@ -36,18 +36,29 @@ import {
 } from "lucide-react";
 import {
   categories,
-  constituencyStats,
-  events,
-  faqs,
-  impactStats,
-  mediaItems,
-  news,
-  projects,
   statuses,
-  testimonials,
   type Project,
   type ProjectStatus,
+  projects as defaultProjects,
+  constituencyStats as defaultConstituencyStats,
+  impactStats as defaultImpactStats,
+  news as defaultNews,
+  events as defaultEvents,
+  testimonials as defaultTestimonials,
+  mediaItems as defaultMediaItems,
+  faqs as defaultFaqs,
 } from "@/lib/portal-data";
+import {
+  getAdminProjects,
+  getAdminConstituencyStats,
+  getAdminImpactStats,
+  getAdminNews,
+  getAdminEvents,
+  getAdminTestimonials,
+  getAdminMediaItems,
+  getAdminFaqs,
+} from "@/lib/admin-data";
+
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -90,13 +101,20 @@ const timeline = [
   { year: "2026", title: "Open Portal", text: "Launched a digital accountability platform." },
 ];
 
-const featuredProject = projects[1];
-
 function statusClass(status: ProjectStatus) {
   return `status-${status.toLowerCase().replaceAll(" ", "-")}`;
 }
 
 export default function ConstituencyPortal() {
+  const [portalProjects, setPortalProjects] = useState<Project[]>(defaultProjects);
+  const [portalStats, setPortalStats] = useState(defaultConstituencyStats);
+  const [portalImpactStats, setPortalImpactStats] = useState(defaultImpactStats);
+  const [portalNews, setPortalNews] = useState(defaultNews);
+  const [portalEvents, setPortalEvents] = useState(defaultEvents);
+  const [portalTestimonials, setPortalTestimonials] = useState(defaultTestimonials);
+  const [portalMediaItems, setPortalMediaItems] = useState(defaultMediaItems);
+  const [portalFaqs, setPortalFaqs] = useState(defaultFaqs);
+
   const [darkMode, setDarkMode] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -105,7 +123,7 @@ export default function ConstituencyPortal() {
   const [community, setCommunity] = useState("All");
   const [year, setYear] = useState("All");
   const [budgetCap, setBudgetCap] = useState(30);
-  const [mapProject, setMapProject] = useState<Project>(projects[0]);
+  const [mapProject, setMapProject] = useState<Project | null>(null);
   const [faqOpen, setFaqOpen] = useState(0);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [comparison, setComparison] = useState(54);
@@ -115,24 +133,36 @@ export default function ConstituencyPortal() {
   const [contactSent, setContactSent] = useState(false);
 
   useEffect(() => {
+    // Read admin-controlled data on mount to avoid Next.js hydration issues
+    setPortalProjects(getAdminProjects());
+    setPortalStats(getAdminConstituencyStats());
+    setPortalImpactStats(getAdminImpactStats());
+    setPortalNews(getAdminNews());
+    setPortalEvents(getAdminEvents());
+    setPortalTestimonials(getAdminTestimonials());
+    setPortalMediaItems(getAdminMediaItems());
+    setPortalFaqs(getAdminFaqs());
+  }, []);
+
+  useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? "dark" : "light";
     window.localStorage.setItem("mp-portal-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
   const communities = useMemo(
-    () => Array.from(new Set(projects.map((project) => project.community))).sort(),
-    [],
+    () => Array.from(new Set(portalProjects.map((project) => project.community))).sort(),
+    [portalProjects],
   );
 
   const years = useMemo(
-    () => Array.from(new Set(projects.map((project) => project.year))).sort(),
-    [],
+    () => Array.from(new Set(portalProjects.map((project) => project.year))).sort(),
+    [portalProjects],
   );
 
   const filteredProjects = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return projects.filter((project) => {
+    return portalProjects.filter((project) => {
       const matchesQuery =
         !query ||
         [
@@ -155,7 +185,11 @@ export default function ConstituencyPortal() {
         project.budget <= budgetCap * 1_000_000
       );
     });
-  }, [budgetCap, category, community, search, status, year]);
+  }, [portalProjects, budgetCap, category, community, search, status, year]);
+
+  const featuredProject = portalProjects[1] || portalProjects[0];
+  const currentMapProject = mapProject || portalProjects[0];
+
 
   function handleNewsletter(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -254,7 +288,7 @@ export default function ConstituencyPortal() {
           className="hero-scrim relative isolate min-h-[760px] overflow-hidden pt-20 text-white"
         >
           <Image
-            src="/bg sheik.jpg"
+            src="/bg_sheik.jpg"
             alt="MP with team picture"
             fill
             priority
@@ -313,7 +347,7 @@ export default function ConstituencyPortal() {
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div className="relative min-h-[560px] overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-[var(--shadow)]">
               <Image
-                src="/sheik mp.jpg"
+                src="/sheik_mp.jpg"
                 alt="Professional portrait of  Hon. Issah Salifu Taylor "
                 fill
                 sizes="(min-width: 1024px) 42vw, 100vw"
@@ -406,7 +440,7 @@ export default function ConstituencyPortal() {
             </div>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {constituencyStats.map((stat) => (
+              {portalStats.map((stat) => (
                 <div key={stat.label} className="portal-card metric-card p-5">
                   <div className="text-3xl font-black text-[var(--primary)]">{stat.value}</div>
                   <div className="mt-2 text-sm font-black text-[var(--foreground)]">{stat.label}</div>
@@ -536,7 +570,7 @@ export default function ConstituencyPortal() {
               <article key={project.slug} className="portal-card overflow-hidden transition hover:-translate-y-1 hover:shadow-[var(--shadow)]">
                 <div className="relative aspect-[16/10]">
                   <Image
-                    src={project.image}
+                    src={safeImageSrc(project.image)}
                     alt={project.title}
                     fill
                     sizes="(min-width: 1024px) 33vw, 100vw"
@@ -612,26 +646,19 @@ export default function ConstituencyPortal() {
                 <div className="text-xs font-black uppercase tracking-[0.16em] text-[var(--muted)]">
                   Selected Project
                 </div>
-                <h3 className="text-2xl font-black text-[var(--foreground)]">{mapProject.title}</h3>
-                <p className="text-sm leading-7 text-[var(--muted)]">{mapProject.description}</p>
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <Link
-                    href={`/projects/${mapProject.slug}`}
-                    className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-black text-white"
-                  >
-                    Project Page
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </Link>
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${mapProject.map.lat},${mapProject.map.lng}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-11 items-center gap-2 rounded-full border border-[var(--line)] px-5 text-sm font-black text-[var(--foreground)]"
-                  >
-                    Google Maps
-                    <ExternalLink size={16} aria-hidden="true" />
-                  </a>
-                </div>
+                <h3 className="text-2xl font-black text-[var(--foreground)]">{currentMapProject?.title}</h3>
+                <p className="text-sm leading-7 text-[var(--muted)]">{currentMapProject?.description}</p>
+                {currentMapProject && (
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <Link
+                      href={`/projects/${currentMapProject.slug}`}
+                      className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-black text-white"
+                    >
+                      Project Page
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -639,12 +666,12 @@ export default function ConstituencyPortal() {
               <span className="map-road left-[8%] top-[28%] w-[54%] rotate-[18deg]" />
               <span className="map-road left-[25%] top-[64%] w-[62%] -rotate-[12deg]" />
               <span className="map-road left-[42%] top-[12%] h-[68%] w-[5px] rotate-[26deg]" />
-              {projects.map((project) => (
+              {portalProjects.map((project) => (
                 <button
                   key={project.slug}
                   type="button"
                   aria-label={`Select ${project.title}`}
-                  aria-pressed={mapProject.slug === project.slug}
+                  aria-pressed={mapProject?.slug === project.slug}
                   className="map-pin"
                   onClick={() => setMapProject(project)}
                   style={{ left: `${project.map.x}%`, top: `${project.map.y}%` }}
@@ -671,7 +698,7 @@ export default function ConstituencyPortal() {
 
             <div className="comparison-frame mt-8 aspect-[16/10]">
               <Image
-                src={featuredProject.beforeImage}
+                src={safeImageSrc(featuredProject.beforeImage)}
                 alt={`${featuredProject.title} before project intervention`}
                 fill
                 sizes="(min-width: 1024px) 58vw, 100vw"
@@ -679,7 +706,7 @@ export default function ConstituencyPortal() {
               />
               <div className="comparison-after" style={{ width: `${comparison}%` }}>
                 <Image
-                  src={featuredProject.afterImage}
+                  src={safeImageSrc(featuredProject.afterImage)}
                   alt={`${featuredProject.title} after project intervention`}
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
@@ -736,7 +763,7 @@ export default function ConstituencyPortal() {
                 </h2>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
-                {impactStats.map((item) => (
+                {portalImpactStats.map((item) => (
                   <div key={item.label} className="rounded-lg border border-white/18 bg-white/10 p-5 backdrop-blur">
                     <div className="text-3xl font-black">{item.value}</div>
                     <div className="mt-2 text-sm font-semibold text-white/76">{item.label}</div>
@@ -764,37 +791,39 @@ export default function ConstituencyPortal() {
           </div>
 
           <div className="mt-10 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-            <article className="portal-card overflow-hidden">
-              <div className="relative aspect-[16/8]">
-                <Image
-                  src={news[0].image}
-                  alt={news[0].title}
-                  fill
-                  sizes="(min-width: 1024px) 58vw, 100vw"
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <div className="flex flex-wrap gap-3 text-xs font-black uppercase tracking-[0.14em] text-[var(--muted)]">
-                  <span>{news[0].category}</span>
-                  <span>{news[0].date}</span>
-                  <span>{news[0].readTime}</span>
+            {portalNews[0] && (
+              <article className="portal-card overflow-hidden">
+                <div className="relative aspect-[16/8]">
+                  <Image
+                    src={safeImageSrc(portalNews[0].image)}
+                    alt={portalNews[0].title}
+                    fill
+                    sizes="(min-width: 1024px) 58vw, 100vw"
+                    className="object-cover"
+                  />
                 </div>
-                <h3 className="mt-3 text-3xl font-black text-[var(--foreground)]">{news[0].title}</h3>
-                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{news[0].excerpt}</p>
-                <button className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-black text-white" type="button">
-                  Read More
-                  <ArrowRight size={16} aria-hidden="true" />
-                </button>
-              </div>
-            </article>
+                <div className="p-6">
+                  <div className="flex flex-wrap gap-3 text-xs font-black uppercase tracking-[0.14em] text-[var(--muted)]">
+                    <span>{portalNews[0].category}</span>
+                    <span>{portalNews[0].date}</span>
+                    <span>{portalNews[0].readTime}</span>
+                  </div>
+                  <h3 className="mt-3 text-3xl font-black text-[var(--foreground)]">{portalNews[0].title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{portalNews[0].excerpt}</p>
+                  <button className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-black text-white" type="button">
+                    Read More
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </button>
+                </div>
+              </article>
+            )}
 
             <div className="grid gap-5">
-              {news.slice(1).map((item) => (
+              {portalNews.slice(1).map((item) => (
                 <article key={item.title} className="portal-card grid grid-cols-[120px_1fr] overflow-hidden">
                   <div className="relative min-h-40">
                     <Image
-                      src={item.image}
+                      src={safeImageSrc(item.image)}
                       alt={item.title}
                       fill
                       sizes="120px"
@@ -830,7 +859,7 @@ export default function ConstituencyPortal() {
             </div>
             <div className="relative space-y-4 pl-7">
               <div className="timeline-line absolute bottom-4 left-2 top-4 w-1 rounded-full" />
-              {events.map((event) => (
+              {portalEvents.map((event) => (
                 <article key={event.title} className="portal-card relative p-5">
                   <span className="absolute -left-[1.75rem] top-6 grid size-5 place-items-center rounded-full bg-[var(--surface)] ring-4 ring-[var(--accent)]" />
                   <div className="flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-[0.14em] text-[var(--muted)]">
@@ -869,7 +898,7 @@ export default function ConstituencyPortal() {
           </div>
 
           <div className="masonry-gallery mt-10">
-            {projects.flatMap((project) => project.gallery).slice(0, 12).map((item) => (
+            {portalProjects.flatMap((project) => project.gallery).slice(0, 12).map((item) => (
               <button
                 type="button"
                 key={`${item.title}-${item.image}`}
@@ -878,7 +907,7 @@ export default function ConstituencyPortal() {
               >
                 <div className="relative aspect-[4/3]">
                   <Image
-                    src={item.image}
+                    src={safeImageSrc(item.image)}
                     alt={item.title}
                     fill
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
@@ -906,7 +935,7 @@ export default function ConstituencyPortal() {
                 Community voices.
               </h2>
               <div className="mt-8 flex gap-2">
-                {testimonials.map((item, index) => (
+                {portalTestimonials.map((item, index) => (
                   <button
                     key={item.name}
                     type="button"
@@ -922,30 +951,32 @@ export default function ConstituencyPortal() {
               </div>
             </div>
 
-            <article className="portal-card p-6">
-              <div className="flex items-center gap-4">
-                <div className="relative size-16 overflow-hidden rounded-full">
-                  <Image
-                    src={testimonials[testimonialIndex].image}
-                    alt={testimonials[testimonialIndex].name}
-                    fill
-                    sizes="64px"
-                    className="object-cover"
-                  />
+            {portalTestimonials[testimonialIndex] && (
+              <article className="portal-card p-6">
+                <div className="flex items-center gap-4">
+                  <div className="relative size-16 overflow-hidden rounded-full">
+                    <Image
+                      src={safeImageSrc(portalTestimonials[testimonialIndex].image)}
+                      alt={portalTestimonials[testimonialIndex].name}
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-[var(--foreground)]">
+                      {portalTestimonials[testimonialIndex].name}
+                    </h3>
+                    <p className="text-sm font-semibold text-[var(--muted)]">
+                      {portalTestimonials[testimonialIndex].role}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-black text-[var(--foreground)]">
-                    {testimonials[testimonialIndex].name}
-                  </h3>
-                  <p className="text-sm font-semibold text-[var(--muted)]">
-                    {testimonials[testimonialIndex].role}
-                  </p>
-                </div>
-              </div>
-              <p className="mt-6 text-2xl font-bold leading-10 text-[var(--foreground)]">
-                &ldquo;{testimonials[testimonialIndex].quote}&rdquo;
-              </p>
-            </article>
+                <p className="mt-6 text-2xl font-bold leading-10 text-[var(--foreground)]">
+                  &ldquo;{portalTestimonials[testimonialIndex].quote}&rdquo;
+                </p>
+              </article>
+            )}
           </div>
         </section>
 
@@ -958,7 +989,7 @@ export default function ConstituencyPortal() {
               Public records and media in one library.
             </h2>
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {mediaItems.map((item) => (
+              {portalMediaItems.map((item) => (
                 <div key={item.label} className="portal-card flex items-center justify-between p-5">
                   <div>
                     <div className="text-sm font-black text-[var(--foreground)]">{item.label}</div>
@@ -977,7 +1008,7 @@ export default function ConstituencyPortal() {
               Frequently Asked Questions
             </p>
             <div className="mt-6 divide-y divide-[var(--line)] rounded-lg border border-[var(--line)] bg-[var(--surface)]">
-              {faqs.map((item, index) => (
+              {portalFaqs.map((item, index) => (
                 <div key={item.question}>
                   <button
                     type="button"
@@ -1186,7 +1217,7 @@ export default function ConstituencyPortal() {
           <div className="w-full max-w-5xl overflow-hidden rounded-lg bg-[var(--surface)]">
             <div className="relative aspect-[16/10]">
               <Image
-                src={galleryItem.image}
+                src={safeImageSrc(galleryItem.image)}
                 alt={galleryItem.title}
                 fill
                 sizes="90vw"

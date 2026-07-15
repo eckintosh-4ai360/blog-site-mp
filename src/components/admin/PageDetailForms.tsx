@@ -1,0 +1,451 @@
+"use client";
+
+import { useState } from "react";
+import { PlusCircle, Trash2, Save } from "lucide-react";
+import ImageUploadField from "./ImageUploadField";
+import {
+  useAdminData,
+  type StatItem,
+  type ImpactStat,
+  type NewsItem,
+  type EventItem,
+  type Testimonial,
+  type MediaItem,
+  type FaqItem,
+} from "@/lib/admin-data";
+
+// ─── Shared Styles ─────────────────────────────────────────────────────────
+const inputCls =
+  "w-full rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold text-[var(--foreground)] placeholder:text-[var(--muted)]/60 focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition";
+
+const textareaCls = inputCls + " resize-none leading-7";
+
+function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-2 rounded-xl bg-[var(--secondary)] px-5 py-2.5 text-sm font-black text-white hover:opacity-90 transition"
+    >
+      <Save size={15} />
+      {saved ? "Saved ✓" : "Save Changes"}
+    </button>
+  );
+}
+
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-sm">
+      <h3 className="mb-6 text-base font-black text-[var(--foreground)]">{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+// ─── Constituency Stats ────────────────────────────────────────────────────
+function ConstituencyStatsEditor() {
+  const { constituencyStats, saveConstituencyStats } = useAdminData();
+  const [items, setItems] = useState<StatItem[]>(constituencyStats);
+  const [saved, setSaved] = useState(false);
+
+  // sync if context loads
+  if (constituencyStats.length && !items.length) setItems(constituencyStats);
+
+  function save() {
+    saveConstituencyStats(items);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <SectionCard title="Constituency Stats">
+      <div className="space-y-3">
+        {items.map((item, i) => (
+          <div key={i} className="flex gap-3">
+            <input
+              className={inputCls + " flex-[2]"}
+              placeholder="Label"
+              value={item.label}
+              onChange={(e) => {
+                const n = [...items]; n[i] = { ...n[i], label: e.target.value }; setItems(n);
+              }}
+            />
+            <input
+              className={inputCls + " w-28"}
+              placeholder="Value"
+              value={item.value}
+              onChange={(e) => {
+                const n = [...items]; n[i] = { ...n[i], value: e.target.value }; setItems(n);
+              }}
+            />
+            <input
+              className={inputCls + " flex-[2]"}
+              placeholder="Note"
+              value={item.note}
+              onChange={(e) => {
+                const n = [...items]; n[i] = { ...n[i], note: e.target.value }; setItems(n);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+              className="grid size-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--danger)] hover:bg-red-500/10 transition"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex justify-between">
+        <button
+          type="button"
+          onClick={() => setItems([...items, { label: "", value: "", note: "" }])}
+          className="flex items-center gap-2 text-xs font-black text-[var(--primary)] hover:underline"
+        >
+          <PlusCircle size={14} /> Add Stat
+        </button>
+        <SaveButton onClick={save} saved={saved} />
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Impact Stats ──────────────────────────────────────────────────────────
+function ImpactStatsEditor() {
+  const { impactStats, saveImpactStats } = useAdminData();
+  const [items, setItems] = useState<ImpactStat[]>(impactStats);
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    saveImpactStats(items);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <SectionCard title="Impact Stats (Hero Numbers)">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {items.map((item, i) => (
+          <div key={i} className="flex gap-3">
+            <input
+              className={inputCls + " w-28"}
+              placeholder="Value e.g. 15"
+              value={item.value}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], value: e.target.value }; setItems(n); }}
+            />
+            <input
+              className={inputCls + " flex-1"}
+              placeholder="Label e.g. Schools Built"
+              value={item.label}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], label: e.target.value }; setItems(n); }}
+            />
+            <button
+              type="button"
+              onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+              className="grid size-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--danger)] hover:bg-red-500/10 transition"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex justify-between">
+        <button
+          type="button"
+          onClick={() => setItems([...items, { value: "", label: "" }])}
+          className="flex items-center gap-2 text-xs font-black text-[var(--primary)] hover:underline"
+        >
+          <PlusCircle size={14} /> Add Stat
+        </button>
+        <SaveButton onClick={save} saved={saved} />
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── News ──────────────────────────────────────────────────────────────────
+function NewsEditor() {
+  const { news, saveNews } = useAdminData();
+  const [items, setItems] = useState<NewsItem[]>(news);
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    saveNews(items);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <SectionCard title="News Articles">
+      <div className="space-y-5">
+        {items.map((item, i) => (
+          <div key={i} className="rounded-xl border border-[var(--line)] p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-xs font-black uppercase tracking-[0.14em] text-[var(--primary)]">Article #{i + 1}</span>
+              <button
+                type="button"
+                onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+                className="text-xs font-black text-[var(--danger)] hover:underline flex items-center gap-1"
+              >
+                <Trash2 size={12} /> Remove
+              </button>
+            </div>
+            <input className={inputCls} placeholder="Title" value={item.title}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], title: e.target.value }; setItems(n); }} />
+            <div className="grid gap-3 sm:grid-cols-3">
+              <input className={inputCls} placeholder="Category" value={item.category}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], category: e.target.value }; setItems(n); }} />
+              <input className={inputCls} placeholder="Date e.g. 28 Jun 2026" value={item.date}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], date: e.target.value }; setItems(n); }} />
+              <input className={inputCls} placeholder="Read time e.g. 3 min read" value={item.readTime}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], readTime: e.target.value }; setItems(n); }} />
+            </div>
+            <ImageUploadField label="Article Image" value={item.image}
+              onChange={(v) => { const n = [...items]; n[i] = { ...n[i], image: v }; setItems(n); }} />
+            <textarea rows={2} className={textareaCls} placeholder="Excerpt…" value={item.excerpt}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], excerpt: e.target.value }; setItems(n); }} />
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex justify-between">
+        <button type="button"
+          onClick={() => setItems([...items, { title: "", category: "", date: "", readTime: "", image: "", excerpt: "" }])}
+          className="flex items-center gap-2 text-xs font-black text-[var(--primary)] hover:underline"
+        >
+          <PlusCircle size={14} /> Add Article
+        </button>
+        <SaveButton onClick={save} saved={saved} />
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Events ────────────────────────────────────────────────────────────────
+function EventsEditor() {
+  const { events, saveEvents } = useAdminData();
+  const [items, setItems] = useState<EventItem[]>(events);
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    saveEvents(items);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <SectionCard title="Upcoming Events">
+      <div className="space-y-3">
+        {items.map((item, i) => (
+          <div key={i} className="grid gap-3 sm:grid-cols-4 items-start">
+            <input className={inputCls} placeholder="Title" value={item.title}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], title: e.target.value }; setItems(n); }} />
+            <input className={inputCls} placeholder="Date e.g. 18 Jul 2026" value={item.date}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], date: e.target.value }; setItems(n); }} />
+            <input className={inputCls} placeholder="Location" value={item.location}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], location: e.target.value }; setItems(n); }} />
+            <div className="flex gap-2">
+              <input className={inputCls + " flex-1"} placeholder="Type" value={item.type}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], type: e.target.value }; setItems(n); }} />
+              <button type="button"
+                onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+                className="grid size-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--danger)] hover:bg-red-500/10 transition"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex justify-between">
+        <button type="button"
+          onClick={() => setItems([...items, { title: "", date: "", location: "", type: "" }])}
+          className="flex items-center gap-2 text-xs font-black text-[var(--primary)] hover:underline"
+        >
+          <PlusCircle size={14} /> Add Event
+        </button>
+        <SaveButton onClick={save} saved={saved} />
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Testimonials ──────────────────────────────────────────────────────────
+function TestimonialsEditor() {
+  const { testimonials, saveTestimonials } = useAdminData();
+  const [items, setItems] = useState<Testimonial[]>(testimonials);
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    saveTestimonials(items);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <SectionCard title="Testimonials">
+      <div className="space-y-5">
+        {items.map((item, i) => (
+          <div key={i} className="rounded-xl border border-[var(--line)] p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-xs font-black uppercase tracking-[0.14em] text-[var(--primary)]">Testimonial #{i + 1}</span>
+              <button type="button" onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+                className="text-xs font-black text-[var(--danger)] hover:underline flex items-center gap-1">
+                <Trash2 size={12} /> Remove
+              </button>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <input className={inputCls} placeholder="Name" value={item.name}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], name: e.target.value }; setItems(n); }} />
+              <input className={inputCls} placeholder="Role" value={item.role}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], role: e.target.value }; setItems(n); }} />
+            </div>
+            <ImageUploadField label="Photo" value={item.image}
+              onChange={(v) => { const n = [...items]; n[i] = { ...n[i], image: v }; setItems(n); }} />
+            <textarea rows={3} className={textareaCls} placeholder="Quote…" value={item.quote}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], quote: e.target.value }; setItems(n); }} />
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex justify-between">
+        <button type="button"
+          onClick={() => setItems([...items, { name: "", role: "", image: "", quote: "" }])}
+          className="flex items-center gap-2 text-xs font-black text-[var(--primary)] hover:underline"
+        >
+          <PlusCircle size={14} /> Add Testimonial
+        </button>
+        <SaveButton onClick={save} saved={saved} />
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Media Items ───────────────────────────────────────────────────────────
+function MediaItemsEditor() {
+  const { mediaItems, saveMediaItems } = useAdminData();
+  const [items, setItems] = useState<MediaItem[]>(mediaItems);
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    saveMediaItems(items);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <SectionCard title="Media Section Counts">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {items.map((item, i) => (
+          <div key={i} className="flex gap-3">
+            <input className={inputCls + " flex-1"} placeholder="Label" value={item.label}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], label: e.target.value }; setItems(n); }} />
+            <input className={inputCls + " w-24"} placeholder="Count" value={item.count}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], count: e.target.value }; setItems(n); }} />
+            <button type="button" onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+              className="grid size-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--danger)] hover:bg-red-500/10 transition">
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex justify-between">
+        <button type="button"
+          onClick={() => setItems([...items, { label: "", count: "0" }])}
+          className="flex items-center gap-2 text-xs font-black text-[var(--primary)] hover:underline"
+        >
+          <PlusCircle size={14} /> Add Media Type
+        </button>
+        <SaveButton onClick={save} saved={saved} />
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── FAQs ──────────────────────────────────────────────────────────────────
+function FaqsEditor() {
+  const { faqs, saveFaqs } = useAdminData();
+  const [items, setItems] = useState<FaqItem[]>(faqs);
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    saveFaqs(items);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <SectionCard title="FAQs">
+      <div className="space-y-4">
+        {items.map((item, i) => (
+          <div key={i} className="rounded-xl border border-[var(--line)] p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-xs font-black uppercase tracking-[0.14em] text-[var(--primary)]">FAQ #{i + 1}</span>
+              <button type="button" onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+                className="text-xs font-black text-[var(--danger)] hover:underline flex items-center gap-1">
+                <Trash2 size={12} /> Remove
+              </button>
+            </div>
+            <input className={inputCls} placeholder="Question" value={item.question}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], question: e.target.value }; setItems(n); }} />
+            <textarea rows={3} className={textareaCls} placeholder="Answer…" value={item.answer}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], answer: e.target.value }; setItems(n); }} />
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex justify-between">
+        <button type="button"
+          onClick={() => setItems([...items, { question: "", answer: "" }])}
+          className="flex items-center gap-2 text-xs font-black text-[var(--primary)] hover:underline"
+        >
+          <PlusCircle size={14} /> Add FAQ
+        </button>
+        <SaveButton onClick={save} saved={saved} />
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Tab Container ──────────────────────────────────────────────────────────
+const TABS = [
+  { id: "stats", label: "Stats" },
+  { id: "impact", label: "Impact Numbers" },
+  { id: "news", label: "News" },
+  { id: "events", label: "Events" },
+  { id: "testimonials", label: "Testimonials" },
+  { id: "media", label: "Media Counts" },
+  { id: "faqs", label: "FAQs" },
+];
+
+export default function PageDetailForms() {
+  const [activeTab, setActiveTab] = useState("stats");
+
+  return (
+    <div>
+      {/* Tab bar */}
+      <div className="mb-6 flex flex-wrap gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-2">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`rounded-xl px-4 py-2 text-xs font-black transition-all ${
+              activeTab === tab.id
+                ? "bg-[var(--primary)] text-white shadow"
+                : "text-[var(--muted)] hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {activeTab === "stats" && <ConstituencyStatsEditor />}
+      {activeTab === "impact" && <ImpactStatsEditor />}
+      {activeTab === "news" && <NewsEditor />}
+      {activeTab === "events" && <EventsEditor />}
+      {activeTab === "testimonials" && <TestimonialsEditor />}
+      {activeTab === "media" && <MediaItemsEditor />}
+      {activeTab === "faqs" && <FaqsEditor />}
+    </div>
+  );
+}

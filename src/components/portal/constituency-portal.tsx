@@ -123,7 +123,6 @@ export default function ConstituencyPortal() {
   const [community, setCommunity] = useState("All");
   const [year, setYear] = useState("All");
   const [budgetCap, setBudgetCap] = useState(30);
-  const [mapProject, setMapProject] = useState<Project | null>(null);
   const [faqOpen, setFaqOpen] = useState(0);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [comparison, setComparison] = useState(54);
@@ -188,7 +187,6 @@ export default function ConstituencyPortal() {
   }, [portalProjects, budgetCap, category, community, search, status, year]);
 
   const featuredProject = portalProjects[1] || portalProjects[0];
-  const currentMapProject = mapProject || portalProjects[0];
 
 
   function handleNewsletter(event: FormEvent<HTMLFormElement>) {
@@ -606,15 +604,7 @@ export default function ConstituencyPortal() {
                       style={{ width: `${project.progress}%` }}
                     />
                   </div>
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setMapProject(project)}
-                      className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--foreground)] transition hover:border-[var(--secondary)]"
-                    >
-                      <MapPin size={15} aria-hidden="true" />
-                      Map
-                    </button>
+                  <div className="mt-5 flex justify-end">
                     <Link
                       href={`/projects/${project.slug}`}
                       className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--primary)] px-4 text-xs font-black text-white transition hover:bg-[var(--primary-strong)]"
@@ -629,59 +619,7 @@ export default function ConstituencyPortal() {
           </div>
         </section>
 
-        <section className="border-y border-[var(--line)] bg-[var(--surface)] py-20">
-          <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--secondary)]">
-                Interactive Project Map
-              </p>
-              <h2 className="mt-3 text-4xl font-black leading-tight text-[var(--foreground)]">
-                Location intelligence for public works.
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-                Project pins show where investments are happening across the
-                constituency, with quick access to map directions and details.
-              </p>
-              <div className="mt-8 space-y-3">
-                <div className="text-xs font-black uppercase tracking-[0.16em] text-[var(--muted)]">
-                  Selected Project
-                </div>
-                <h3 className="text-2xl font-black text-[var(--foreground)]">{currentMapProject?.title}</h3>
-                <p className="text-sm leading-7 text-[var(--muted)]">{currentMapProject?.description}</p>
-                {currentMapProject && (
-                  <div className="flex flex-wrap gap-3 pt-2">
-                    <Link
-                      href={`/projects/${currentMapProject.slug}`}
-                      className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-black text-white"
-                    >
-                      Project Page
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
 
-            <div className="project-map">
-              <span className="map-road left-[8%] top-[28%] w-[54%] rotate-[18deg]" />
-              <span className="map-road left-[25%] top-[64%] w-[62%] -rotate-[12deg]" />
-              <span className="map-road left-[42%] top-[12%] h-[68%] w-[5px] rotate-[26deg]" />
-              {portalProjects.map((project) => (
-                <button
-                  key={project.slug}
-                  type="button"
-                  aria-label={`Select ${project.title}`}
-                  aria-pressed={mapProject?.slug === project.slug}
-                  className="map-pin"
-                  onClick={() => setMapProject(project)}
-                  style={{ left: `${project.map.x}%`, top: `${project.map.y}%` }}
-                >
-                  <MapPin size={18} aria-hidden="true" />
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
 
         <section className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
           <div>

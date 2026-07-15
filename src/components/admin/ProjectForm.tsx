@@ -581,30 +581,7 @@ export default function ProjectForm({ initial, mode }: Props) {
           </button>
         </div>
 
-        {/* ── Map ── */}
-        <SectionHeading label="Vector Map Positioning" />
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="Map X (% position)">
-            <input
-              type="number"
-              min={0}
-              max={100}
-              className={inputCls}
-              value={form.map.x}
-              onChange={(e) => set("map", { ...form.map, x: Number(e.target.value) })}
-            />
-          </Field>
-          <Field label="Map Y (% position)">
-            <input
-              type="number"
-              min={0}
-              max={100}
-              className={inputCls}
-              value={form.map.y}
-              onChange={(e) => set("map", { ...form.map, y: Number(e.target.value) })}
-            />
-          </Field>
-        </div>
+
 
         {/* ── Bottom save ── */}
         <div className="mt-10 flex justify-end">

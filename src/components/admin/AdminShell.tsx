@@ -28,6 +28,17 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     if (!isLoggedIn()) router.replace("/admin");
   }, [router]);
 
+  useEffect(() => {
+    const html = document.documentElement;
+    const savedTheme = window.localStorage.getItem("mp-portal-theme");
+    if (savedTheme) {
+      html.setAttribute("data-theme", savedTheme);
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      html.setAttribute("data-theme", prefersDark ? "dark" : "light");
+    }
+  }, []);
+
   function handleLogout() {
     logout();
     router.replace("/admin");
@@ -36,7 +47,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   function toggleTheme() {
     const html = document.documentElement;
     const current = html.getAttribute("data-theme");
-    html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+    const next = current === "dark" ? "light" : "dark";
+    html.setAttribute("data-theme", next);
+    window.localStorage.setItem("mp-portal-theme", next);
   }
 
   return (

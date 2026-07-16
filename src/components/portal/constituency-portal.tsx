@@ -168,6 +168,17 @@ export default function ConstituencyPortal() {
     loadData();
   }, []);
 
+  // Load saved theme on mount to prevent hydration mismatch
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("mp-portal-theme");
+    if (savedTheme) {
+      setDarkMode(savedTheme === "dark");
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setDarkMode(prefersDark);
+    }
+  }, []);
+
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? "dark" : "light";
     window.localStorage.setItem("mp-portal-theme", darkMode ? "dark" : "light");

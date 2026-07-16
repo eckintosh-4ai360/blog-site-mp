@@ -274,6 +274,14 @@ export default function ConstituencyPortal() {
             >
               {darkMode ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
             </button>
+
+            <Link
+              href="/admin"
+              className="flex h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-xs font-bold text-[var(--foreground)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
+            >
+              <ShieldCheck size={16} aria-hidden="true" />
+              <span>Admin</span>
+            </Link>
           </div>
 
           <button
@@ -300,6 +308,14 @@ export default function ConstituencyPortal() {
                   {item.label}
                 </a>
               ))}
+              <Link
+                href="/admin"
+                onClick={() => setNavOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold text-[var(--primary)] hover:bg-[var(--surface-soft)]"
+              >
+                <ShieldCheck size={16} aria-hidden="true" />
+                <span>Admin Login</span>
+              </Link>
             </div>
           </div>
         ) : null}

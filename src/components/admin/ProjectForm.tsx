@@ -71,6 +71,54 @@ const inputCls =
 
 const textareaCls = inputCls + " resize-none leading-7";
 
+function dbDateToInputDate(dbDate: string | undefined | null): string {
+  if (!dbDate) return "";
+  dbDate = dbDate.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dbDate)) {
+    return dbDate;
+  }
+  const parts = dbDate.split(/\s+/);
+  if (parts.length === 3) {
+    const day = parts[0];
+    const monthName = parts[1].toLowerCase().slice(0, 3);
+    const year = parts[2];
+    const MONTH_MAP: Record<string, string> = {
+      jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
+      jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12"
+    };
+    const month = MONTH_MAP[monthName];
+    if (month) {
+      return `${year}-${month}-${day.padStart(2, '0')}`;
+    }
+  }
+  const parsed = Date.parse(dbDate);
+  if (!isNaN(parsed)) {
+    const d = new Date(parsed);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dayStr}`;
+  }
+  return "";
+}
+
+function inputDateToDbDate(inputDate: string | undefined | null): string {
+  if (!inputDate) return "";
+  inputDate = inputDate.trim();
+  const parts = inputDate.split("-");
+  if (parts.length === 3) {
+    const year = parts[0];
+    const monthIndex = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthName = MONTHS[monthIndex - 1];
+    if (monthName) {
+      return `${day} ${monthName} ${year}`;
+    }
+  }
+  return inputDate;
+}
+
 // ─── Section Heading ───────────────────────────────────────────────────────
 function SectionHeading({ label }: { label: string }) {
   return (
@@ -317,26 +365,26 @@ export default function ProjectForm({ initial, mode }: Props) {
           </Field>
           <Field label="Start Date">
             <input
+              type="date"
               className={inputCls}
-              value={form.startDate}
-              onChange={(e) => set("startDate", e.target.value)}
-              placeholder="e.g. 15 Jan 2025"
+              value={dbDateToInputDate(form.startDate)}
+              onChange={(e) => set("startDate", inputDateToDbDate(e.target.value))}
             />
           </Field>
           <Field label="Expected Completion">
             <input
+              type="date"
               className={inputCls}
-              value={form.expectedCompletion}
-              onChange={(e) => set("expectedCompletion", e.target.value)}
-              placeholder="e.g. 31 Oct 2025"
+              value={dbDateToInputDate(form.expectedCompletion)}
+              onChange={(e) => set("expectedCompletion", inputDateToDbDate(e.target.value))}
             />
           </Field>
           <Field label="Completion Date (if done)">
             <input
+              type="date"
               className={inputCls}
-              value={form.completionDate ?? ""}
-              onChange={(e) => set("completionDate", e.target.value || undefined)}
-              placeholder="e.g. 18 Sep 2025"
+              value={dbDateToInputDate(form.completionDate ?? "")}
+              onChange={(e) => set("completionDate", inputDateToDbDate(e.target.value) || undefined)}
             />
           </Field>
         </div>
@@ -430,12 +478,12 @@ export default function ProjectForm({ initial, mode }: Props) {
                 }}
               />
               <input
+                type="date"
                 className={inputCls + " w-44"}
-                value={item.date}
-                placeholder="Date"
+                value={dbDateToInputDate(item.date)}
                 onChange={(e) => {
                   const next = [...form.timeline];
-                  next[i] = { ...next[i], date: e.target.value };
+                  next[i] = { ...next[i], date: inputDateToDbDate(e.target.value) };
                   set("timeline", next);
                 }}
               />
@@ -476,12 +524,12 @@ export default function ProjectForm({ initial, mode }: Props) {
           {form.updates.map((item, i) => (
             <div key={i} className="flex items-start gap-3">
               <input
+                type="date"
                 className={inputCls + " w-44 shrink-0"}
-                value={item.date}
-                placeholder="Date"
+                value={dbDateToInputDate(item.date)}
                 onChange={(e) => {
                   const next = [...form.updates];
-                  next[i] = { ...next[i], date: e.target.value };
+                  next[i] = { ...next[i], date: inputDateToDbDate(e.target.value) };
                   set("updates", next);
                 }}
               />

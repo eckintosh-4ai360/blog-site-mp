@@ -20,6 +20,54 @@ const inputCls =
 
 const textareaCls = inputCls + " resize-none leading-7";
 
+function dbDateToInputDate(dbDate: string | undefined | null): string {
+  if (!dbDate) return "";
+  dbDate = dbDate.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dbDate)) {
+    return dbDate;
+  }
+  const parts = dbDate.split(/\s+/);
+  if (parts.length === 3) {
+    const day = parts[0];
+    const monthName = parts[1].toLowerCase().slice(0, 3);
+    const year = parts[2];
+    const MONTH_MAP: Record<string, string> = {
+      jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
+      jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12"
+    };
+    const month = MONTH_MAP[monthName];
+    if (month) {
+      return `${year}-${month}-${day.padStart(2, '0')}`;
+    }
+  }
+  const parsed = Date.parse(dbDate);
+  if (!isNaN(parsed)) {
+    const d = new Date(parsed);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dayStr}`;
+  }
+  return "";
+}
+
+function inputDateToDbDate(inputDate: string | undefined | null): string {
+  if (!inputDate) return "";
+  inputDate = inputDate.trim();
+  const parts = inputDate.split("-");
+  if (parts.length === 3) {
+    const year = parts[0];
+    const monthIndex = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthName = MONTHS[monthIndex - 1];
+    if (monthName) {
+      return `${day} ${monthName} ${year}`;
+    }
+  }
+  return inputDate;
+}
+
 function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean }) {
   return (
     <button
@@ -276,8 +324,8 @@ function NewsEditor() {
             <div className="grid gap-3 sm:grid-cols-3">
               <input className={inputCls} placeholder="Category" value={item.category}
                 onChange={(e) => { const n = [...items]; n[i] = { ...n[i], category: e.target.value }; setItems(n); }} />
-              <input className={inputCls} placeholder="Date e.g. 28 Jun 2026" value={item.date}
-                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], date: e.target.value }; setItems(n); }} />
+              <input type="date" className={inputCls} value={dbDateToInputDate(item.date)}
+                onChange={(e) => { const n = [...items]; n[i] = { ...n[i], date: inputDateToDbDate(e.target.value) }; setItems(n); }} />
               <input className={inputCls} placeholder="Read time e.g. 3 min read" value={item.readTime}
                 onChange={(e) => { const n = [...items]; n[i] = { ...n[i], readTime: e.target.value }; setItems(n); }} />
             </div>
@@ -326,8 +374,8 @@ function EventsEditor() {
           <div key={i} className="grid gap-3 sm:grid-cols-4 items-start">
             <input className={inputCls} placeholder="Title" value={item.title}
               onChange={(e) => { const n = [...items]; n[i] = { ...n[i], title: e.target.value }; setItems(n); }} />
-            <input className={inputCls} placeholder="Date e.g. 18 Jul 2026" value={item.date}
-              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], date: e.target.value }; setItems(n); }} />
+            <input type="date" className={inputCls} value={dbDateToInputDate(item.date)}
+              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], date: inputDateToDbDate(e.target.value) }; setItems(n); }} />
             <input className={inputCls} placeholder="Location" value={item.location}
               onChange={(e) => { const n = [...items]; n[i] = { ...n[i], location: e.target.value }; setItems(n); }} />
             <div className="flex gap-2">

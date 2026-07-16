@@ -12,8 +12,20 @@ export default function EditProjectPage() {
   const [project, setProject] = useState<Project | null | undefined>(undefined);
 
   useEffect(() => {
-    const found = getAdminProject(params.slug);
-    setProject(found ?? null);
+    async function load() {
+      try {
+        const res = await fetch(`/api/projects/${params.slug}`);
+        if (res.ok) {
+          const data = await res.json();
+          setProject(data);
+        } else {
+          setProject(null);
+        }
+      } catch {
+        setProject(null);
+      }
+    }
+    load();
   }, [params.slug]);
 
   if (project === undefined) {

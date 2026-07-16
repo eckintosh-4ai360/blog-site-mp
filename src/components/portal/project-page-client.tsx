@@ -33,11 +33,18 @@ export default function ProjectPageClient({
   const [project, setProject] = useState<Project | undefined>(initialProject);
 
   useEffect(() => {
-    // Read admin-controlled data on mount to get client-side edits/additions
-    const adminProject = getAdminProject(slug);
-    if (adminProject) {
-      setProject(adminProject);
+    async function load() {
+      try {
+        const res = await fetch(`/api/projects/${slug}`);
+        if (res.ok) {
+          const data = await res.json();
+          setProject(data);
+        }
+      } catch (err) {
+        console.error("Failed to load project details:", err);
+      }
     }
+    load();
   }, [slug]);
 
   if (!project) {

@@ -1,47 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  projects as defaultProjects,
-  constituencyStats as defaultConstituencyStats,
-  impactStats as defaultImpactStats,
-  news as defaultNews,
-  events as defaultEvents,
-  testimonials as defaultTestimonials,
-  mediaItems as defaultMediaItems,
-  faqs as defaultFaqs,
-  type Project,
-} from "@/lib/portal-data";
-
-// ─── Storage Keys ──────────────────────────────────────────────────────────
-const KEYS = {
-  projects: "mp_admin_projects",
-  constituencyStats: "mp_admin_constituency_stats",
-  impactStats: "mp_admin_impact_stats",
-  news: "mp_admin_news",
-  events: "mp_admin_events",
-  testimonials: "mp_admin_testimonials",
-  mediaItems: "mp_admin_media_items",
-  faqs: "mp_admin_faqs",
-} as const;
-
-// ─── Helper ────────────────────────────────────────────────────────────────
-function load<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function save<T>(key: string, value: T): void {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
-// ─── Types re-exported for consumers ──────────────────────────────────────
-export type { Project } from "@/lib/portal-data";
+import { type Project } from "@/lib/portal-data";
 
 export type StatItem = { label: string; value: string; note: string };
 export type ImpactStat = { value: string; label: string };
@@ -68,44 +28,36 @@ export type Testimonial = {
 export type MediaItem = { label: string; count: string };
 export type FaqItem = { question: string; answer: string };
 
-// ─── Public getters (used by portal pages) ─────────────────────────────────
+// ─── Legacy Sync Placeholders (Refactored to async fetches in components) ───
 export function getAdminProjects(): Project[] {
-  return load<Project[]>(KEYS.projects, defaultProjects);
+  return [];
 }
-
 export function getAdminProject(slug: string): Project | undefined {
-  return getAdminProjects().find((p) => p.slug === slug);
+  return undefined;
 }
-
 export function getAdminNews(): NewsItem[] {
-  return load<NewsItem[]>(KEYS.news, defaultNews);
+  return [];
 }
-
 export function getAdminEvents(): EventItem[] {
-  return load<EventItem[]>(KEYS.events, defaultEvents);
+  return [];
 }
-
 export function getAdminTestimonials(): Testimonial[] {
-  return load<Testimonial[]>(KEYS.testimonials, defaultTestimonials);
+  return [];
 }
-
 export function getAdminFaqs(): FaqItem[] {
-  return load<FaqItem[]>(KEYS.faqs, defaultFaqs);
+  return [];
 }
-
 export function getAdminConstituencyStats(): StatItem[] {
-  return load<StatItem[]>(KEYS.constituencyStats, defaultConstituencyStats);
+  return [];
 }
-
 export function getAdminImpactStats(): ImpactStat[] {
-  return load<ImpactStat[]>(KEYS.impactStats, defaultImpactStats);
+  return [];
 }
-
 export function getAdminMediaItems(): MediaItem[] {
-  return load<MediaItem[]>(KEYS.mediaItems, defaultMediaItems);
+  return [];
 }
 
-// ─── Admin Data Hook ────────────────────────────────────────────────────────
+// ─── Modern Client Data Hook ───
 export function useAdminData() {
   const [projects, setProjectsState] = useState<Project[]>([]);
   const [constituencyStats, setConstituencyStatsState] = useState<StatItem[]>([]);
@@ -115,82 +67,202 @@ export function useAdminData() {
   const [testimonials, setTestimonialsState] = useState<Testimonial[]>([]);
   const [mediaItems, setMediaItemsState] = useState<MediaItem[]>([]);
   const [faqs, setFaqsState] = useState<FaqItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    try {
+      const [p, cs, is, n, e, t, m, f] = await Promise.all([
+        fetch("/api/projects").then((r) => r.json()),
+        fetch("/api/stats").then((r) => r.json()),
+        fetch("/api/stats?type=impact").then((r) => r.json()),
+        fetch("/api/news").then((r) => r.json()),
+        fetch("/api/events").then((r) => r.json()),
+        fetch("/api/testimonials").then((r) => r.json()),
+        fetch("/api/media").then((r) => r.json()),
+        fetch("/api/faqs").then((r) => r.json()),
+      ]);
+
+      if (Array.isArray(p)) setProjectsState(p);
+      if (Array.isArray(cs)) setConstituencyStatsState(cs);
+      if (Array.isArray(is)) setImpactStatsState(is);
+      if (Array.isArray(n)) setNewsState(n);
+      if (Array.isArray(e)) setEventsState(e);
+      if (Array.isArray(t)) setTestimonialsState(t);
+      if (Array.isArray(m)) setMediaItemsState(m);
+      if (Array.isArray(f)) setFaqsState(f);
+    } catch (err) {
+      console.error("Failed to refresh admin data from API:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    setProjectsState(load(KEYS.projects, defaultProjects));
-    setConstituencyStatsState(load(KEYS.constituencyStats, defaultConstituencyStats));
-    setImpactStatsState(load(KEYS.impactStats, defaultImpactStats));
-    setNewsState(load(KEYS.news, defaultNews));
-    setEventsState(load(KEYS.events, defaultEvents));
-    setTestimonialsState(load(KEYS.testimonials, defaultTestimonials));
-    setMediaItemsState(load(KEYS.mediaItems, defaultMediaItems));
-    setFaqsState(load(KEYS.faqs, defaultFaqs));
-  }, []);
+    refresh();
+  }, [refresh]);
 
-  // ── Projects ──
-  const saveProject = useCallback((project: Project) => {
-    setProjectsState((prev) => {
-      const idx = prev.findIndex((p) => p.slug === project.slug);
-      const next = idx >= 0 ? prev.map((p, i) => (i === idx ? project : p)) : [project, ...prev];
-      save(KEYS.projects, next);
-      return next;
-    });
-  }, []);
+  const saveProject = useCallback(async (project: Project) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(project),
+      });
+      if (!res.ok) throw new Error("Failed to save project");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  const deleteProject = useCallback((slug: string) => {
-    setProjectsState((prev) => {
-      const next = prev.filter((p) => p.slug !== slug);
-      save(KEYS.projects, next);
-      return next;
-    });
-  }, []);
+  const deleteProject = useCallback(async (slug: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/projects/${slug}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete project");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  // ── Generic section savers ──
-  const saveConstituencyStats = useCallback((data: StatItem[]) => {
-    save(KEYS.constituencyStats, data);
-    setConstituencyStatsState(data);
-  }, []);
+  const saveConstituencyStats = useCallback(async (data: StatItem[]) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/stats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "constituency", items: data }),
+      });
+      if (!res.ok) throw new Error("Failed to save constituency stats");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  const saveImpactStats = useCallback((data: ImpactStat[]) => {
-    save(KEYS.impactStats, data);
-    setImpactStatsState(data);
-  }, []);
+  const saveImpactStats = useCallback(async (data: ImpactStat[]) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/stats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "impact", items: data }),
+      });
+      if (!res.ok) throw new Error("Failed to save impact stats");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  const saveNews = useCallback((data: NewsItem[]) => {
-    save(KEYS.news, data);
-    setNewsState(data);
-  }, []);
+  const saveNews = useCallback(async (data: NewsItem[]) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to save news");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  const saveEvents = useCallback((data: EventItem[]) => {
-    save(KEYS.events, data);
-    setEventsState(data);
-  }, []);
+  const saveEvents = useCallback(async (data: EventItem[]) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to save events");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  const saveTestimonials = useCallback((data: Testimonial[]) => {
-    save(KEYS.testimonials, data);
-    setTestimonialsState(data);
-  }, []);
+  const saveTestimonials = useCallback(async (data: Testimonial[]) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/testimonials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to save testimonials");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  const saveMediaItems = useCallback((data: MediaItem[]) => {
-    save(KEYS.mediaItems, data);
-    setMediaItemsState(data);
-  }, []);
+  const saveMediaItems = useCallback(async (data: MediaItem[]) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to save media items");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  const saveFaqs = useCallback((data: FaqItem[]) => {
-    save(KEYS.faqs, data);
-    setFaqsState(data);
-  }, []);
+  const saveFaqs = useCallback(async (data: FaqItem[]) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/faqs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to save FAQs");
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh]);
 
-  const resetAll = useCallback(() => {
-    Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
-    setProjectsState(defaultProjects);
-    setConstituencyStatsState(defaultConstituencyStats);
-    setImpactStatsState(defaultImpactStats);
-    setNewsState(defaultNews);
-    setEventsState(defaultEvents);
-    setTestimonialsState(defaultTestimonials);
-    setMediaItemsState(defaultMediaItems);
-    setFaqsState(defaultFaqs);
+  const resetAll = useCallback(async () => {
+    // Placeholder to match hook type
   }, []);
 
   return {
@@ -202,6 +274,7 @@ export function useAdminData() {
     testimonials,
     mediaItems,
     faqs,
+    loading,
     saveProject,
     deleteProject,
     saveConstituencyStats,

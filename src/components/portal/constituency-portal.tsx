@@ -79,12 +79,6 @@ const mobileNav = [
   { label: "Contact", href: "#contact", icon: MessageSquare },
 ];
 
-const heroStats = [
-  { label: "Projects Completed", value: "152" },
-  { label: "Communities Served", value: "87" },
-  { label: "Beneficiaries", value: "120,000+" },
-  { label: "Invested", value: "GHS 85M" },
-];
 
 const values = [
   "Transparent leadership",
@@ -131,16 +125,47 @@ export default function ConstituencyPortal() {
   const [newsletterSent, setNewsletterSent] = useState(false);
   const [contactSent, setContactSent] = useState(false);
 
+  const heroStats = useMemo(() => {
+    const completedCount = portalProjects.filter((p) => p.status === "Completed").length;
+    const communitiesCount = new Set(portalProjects.map((p) => p.community)).size;
+    const totalBudget = portalProjects.reduce((sum, p) => sum + p.budget, 0);
+    const budgetLabel = `GHS ${(totalBudget / 1000000).toFixed(1)}M`;
+    const beneficiariesStat = portalStats.find((s) => s.label === "Beneficiaries")?.value || "120,000+";
+
+    return [
+      { label: "Projects Completed", value: String(completedCount) },
+      { label: "Communities Served", value: String(communitiesCount) },
+      { label: "Beneficiaries", value: beneficiariesStat },
+      { label: "Invested", value: budgetLabel },
+    ];
+  }, [portalProjects, portalStats]);
+
   useEffect(() => {
-    // Read admin-controlled data on mount to avoid Next.js hydration issues
-    setPortalProjects(getAdminProjects());
-    setPortalStats(getAdminConstituencyStats());
-    setPortalImpactStats(getAdminImpactStats());
-    setPortalNews(getAdminNews());
-    setPortalEvents(getAdminEvents());
-    setPortalTestimonials(getAdminTestimonials());
-    setPortalMediaItems(getAdminMediaItems());
-    setPortalFaqs(getAdminFaqs());
+    async function loadData() {
+      try {
+        const [projectsRes, statsRes, impactRes, newsRes, eventsRes, testimonialsRes, mediaRes, faqsRes] = await Promise.all([
+          fetch("/api/projects").then((r) => r.json()),
+          fetch("/api/stats").then((r) => r.json()),
+          fetch("/api/stats?type=impact").then((r) => r.json()),
+          fetch("/api/news").then((r) => r.json()),
+          fetch("/api/events").then((r) => r.json()),
+          fetch("/api/testimonials").then((r) => r.json()),
+          fetch("/api/media").then((r) => r.json()),
+          fetch("/api/faqs").then((r) => r.json()),
+        ]);
+        if (Array.isArray(projectsRes)) setPortalProjects(projectsRes);
+        if (Array.isArray(statsRes)) setPortalStats(statsRes);
+        if (Array.isArray(impactRes)) setPortalImpactStats(impactRes);
+        if (Array.isArray(newsRes)) setPortalNews(newsRes);
+        if (Array.isArray(eventsRes)) setPortalEvents(eventsRes);
+        if (Array.isArray(testimonialsRes)) setPortalTestimonials(testimonialsRes);
+        if (Array.isArray(mediaRes)) setPortalMediaItems(mediaRes);
+        if (Array.isArray(faqsRes)) setPortalFaqs(faqsRes);
+      } catch (err) {
+        console.error("Failed to load portal data:", err);
+      }
+    }
+    loadData();
   }, []);
 
   useEffect(() => {

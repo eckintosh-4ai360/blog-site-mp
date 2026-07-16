@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PlusCircle, Trash2, Save } from "lucide-react";
 import ImageUploadField from "./ImageUploadField";
 import {
@@ -45,11 +45,15 @@ function SectionCard({ title, children }: { title: string; children: React.React
 // ─── Constituency Stats ────────────────────────────────────────────────────
 function ConstituencyStatsEditor() {
   const { constituencyStats, saveConstituencyStats } = useAdminData();
-  const [items, setItems] = useState<StatItem[]>(constituencyStats);
+  const [items, setItems] = useState<StatItem[]>([]);
   const [saved, setSaved] = useState(false);
 
-  // sync if context loads
-  if (constituencyStats.length && !items.length) setItems(constituencyStats);
+  // Sync data from database hook using useEffect
+  useEffect(() => {
+    if (constituencyStats && constituencyStats.length > 0) {
+      setItems(constituencyStats);
+    }
+  }, [constituencyStats]);
 
   function save() {
     saveConstituencyStats(items);
@@ -59,43 +63,77 @@ function ConstituencyStatsEditor() {
 
   return (
     <SectionCard title="Constituency Stats">
-      <div className="space-y-3">
+      {/* Column Headers */}
+      {items.length > 0 && (
+        <div className="mb-2 hidden gap-3 px-1 text-[10px] font-black uppercase tracking-wider text-[var(--muted)] sm:flex">
+          <div className="flex-[2]">Stat Label / Description</div>
+          <div className="w-32">Current Value</div>
+          <div className="flex-[2]">Context / Note</div>
+          <div className="w-11"></div>
+        </div>
+      )}
+
+      <div className="space-y-4">
         {items.map((item, i) => (
-          <div key={i} className="flex gap-3">
-            <input
-              className={inputCls + " flex-[2]"}
-              placeholder="Label"
-              value={item.label}
-              onChange={(e) => {
-                const n = [...items]; n[i] = { ...n[i], label: e.target.value }; setItems(n);
-              }}
-            />
-            <input
-              className={inputCls + " w-28"}
-              placeholder="Value"
-              value={item.value}
-              onChange={(e) => {
-                const n = [...items]; n[i] = { ...n[i], value: e.target.value }; setItems(n);
-              }}
-            />
-            <input
-              className={inputCls + " flex-[2]"}
-              placeholder="Note"
-              value={item.note}
-              onChange={(e) => {
-                const n = [...items]; n[i] = { ...n[i], note: e.target.value }; setItems(n);
-              }}
-            />
+          <div key={i} className="flex flex-col gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface-soft)]/20 p-4 sm:flex-row sm:items-end sm:border-0 sm:bg-transparent sm:p-0">
+            {/* Stat Label */}
+            <div className="flex-[2]">
+              <label className="block text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted)] mb-1 sm:hidden">
+                Stat Label / Description
+              </label>
+              <input
+                className={inputCls}
+                placeholder="Label"
+                value={item.label}
+                onChange={(e) => {
+                  const n = [...items]; n[i] = { ...n[i], label: e.target.value }; setItems(n);
+                }}
+              />
+            </div>
+
+            {/* Value */}
+            <div className="w-full sm:w-32">
+              <label className="block text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted)] mb-1 sm:hidden">
+                Current Value
+              </label>
+              <input
+                className={inputCls}
+                placeholder="Value"
+                value={item.value}
+                onChange={(e) => {
+                  const n = [...items]; n[i] = { ...n[i], value: e.target.value }; setItems(n);
+                }}
+              />
+            </div>
+
+            {/* Note */}
+            <div className="flex-[2]">
+              <label className="block text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted)] mb-1 sm:hidden">
+                Context / Note
+              </label>
+              <input
+                className={inputCls}
+                placeholder="Note"
+                value={item.note}
+                onChange={(e) => {
+                  const n = [...items]; n[i] = { ...n[i], note: e.target.value }; setItems(n);
+                }}
+              />
+            </div>
+
+            {/* Actions */}
             <button
               type="button"
               onClick={() => setItems(items.filter((_, idx) => idx !== i))}
-              className="grid size-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--danger)] hover:bg-red-500/10 transition"
+              className="grid size-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--danger)] hover:bg-red-500/10 transition self-end sm:self-auto"
+              aria-label="Delete stat"
             >
               <Trash2 size={14} />
             </button>
           </div>
         ))}
       </div>
+
       <div className="mt-4 flex justify-between">
         <button
           type="button"
@@ -113,8 +151,15 @@ function ConstituencyStatsEditor() {
 // ─── Impact Stats ──────────────────────────────────────────────────────────
 function ImpactStatsEditor() {
   const { impactStats, saveImpactStats } = useAdminData();
-  const [items, setItems] = useState<ImpactStat[]>(impactStats);
+  const [items, setItems] = useState<ImpactStat[]>([]);
   const [saved, setSaved] = useState(false);
+
+  // Sync data from database hook using useEffect
+  useEffect(() => {
+    if (impactStats && impactStats.length > 0) {
+      setItems(impactStats);
+    }
+  }, [impactStats]);
 
   function save() {
     saveImpactStats(items);
@@ -124,31 +169,61 @@ function ImpactStatsEditor() {
 
   return (
     <SectionCard title="Impact Stats (Hero Numbers)">
-      <div className="grid gap-3 sm:grid-cols-2">
+      {/* Column Headers */}
+      {items.length > 0 && (
+        <div className="mb-2 hidden gap-3 px-1 text-[10px] font-black uppercase tracking-wider text-[var(--muted)] sm:flex">
+          <div className="w-32">Stat Value</div>
+          <div className="flex-1">Stat Label / Description</div>
+          <div className="w-11"></div>
+        </div>
+      )}
+
+      <div className="space-y-4">
         {items.map((item, i) => (
-          <div key={i} className="flex gap-3">
-            <input
-              className={inputCls + " w-28"}
-              placeholder="Value e.g. 15"
-              value={item.value}
-              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], value: e.target.value }; setItems(n); }}
-            />
-            <input
-              className={inputCls + " flex-1"}
-              placeholder="Label e.g. Schools Built"
-              value={item.label}
-              onChange={(e) => { const n = [...items]; n[i] = { ...n[i], label: e.target.value }; setItems(n); }}
-            />
+          <div key={i} className="flex flex-col gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface-soft)]/20 p-4 sm:flex-row sm:items-end sm:border-0 sm:bg-transparent sm:p-0">
+            {/* Value */}
+            <div className="w-full sm:w-32">
+              <label className="block text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted)] mb-1 sm:hidden">
+                Stat Value
+              </label>
+              <input
+                className={inputCls}
+                placeholder="Value e.g. 15"
+                value={item.value}
+                onChange={(e) => {
+                  const n = [...items]; n[i] = { ...n[i], value: e.target.value }; setItems(n);
+                }}
+              />
+            </div>
+
+            {/* Label */}
+            <div className="flex-1">
+              <label className="block text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted)] mb-1 sm:hidden">
+                Stat Label / Description
+              </label>
+              <input
+                className={inputCls}
+                placeholder="Label e.g. Schools Built"
+                value={item.label}
+                onChange={(e) => {
+                  const n = [...items]; n[i] = { ...n[i], label: e.target.value }; setItems(n);
+                }}
+              />
+            </div>
+
+            {/* Actions */}
             <button
               type="button"
               onClick={() => setItems(items.filter((_, idx) => idx !== i))}
-              className="grid size-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--danger)] hover:bg-red-500/10 transition"
+              className="grid size-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--danger)] hover:bg-red-500/10 transition self-end sm:self-auto"
+              aria-label="Delete stat"
             >
               <Trash2 size={14} />
             </button>
           </div>
         ))}
       </div>
+
       <div className="mt-4 flex justify-between">
         <button
           type="button"
@@ -166,8 +241,14 @@ function ImpactStatsEditor() {
 // ─── News ──────────────────────────────────────────────────────────────────
 function NewsEditor() {
   const { news, saveNews } = useAdminData();
-  const [items, setItems] = useState<NewsItem[]>(news);
+  const [items, setItems] = useState<NewsItem[]>([]);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (news && news.length > 0) {
+      setItems(news);
+    }
+  }, [news]);
 
   function save() {
     saveNews(items);
@@ -223,8 +304,14 @@ function NewsEditor() {
 // ─── Events ────────────────────────────────────────────────────────────────
 function EventsEditor() {
   const { events, saveEvents } = useAdminData();
-  const [items, setItems] = useState<EventItem[]>(events);
+  const [items, setItems] = useState<EventItem[]>([]);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (events && events.length > 0) {
+      setItems(events);
+    }
+  }, [events]);
 
   function save() {
     saveEvents(items);
@@ -272,8 +359,14 @@ function EventsEditor() {
 // ─── Testimonials ──────────────────────────────────────────────────────────
 function TestimonialsEditor() {
   const { testimonials, saveTestimonials } = useAdminData();
-  const [items, setItems] = useState<Testimonial[]>(testimonials);
+  const [items, setItems] = useState<Testimonial[]>([]);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (testimonials && testimonials.length > 0) {
+      setItems(testimonials);
+    }
+  }, [testimonials]);
 
   function save() {
     saveTestimonials(items);
@@ -322,8 +415,14 @@ function TestimonialsEditor() {
 // ─── Media Items ───────────────────────────────────────────────────────────
 function MediaItemsEditor() {
   const { mediaItems, saveMediaItems } = useAdminData();
-  const [items, setItems] = useState<MediaItem[]>(mediaItems);
+  const [items, setItems] = useState<MediaItem[]>([]);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (mediaItems && mediaItems.length > 0) {
+      setItems(mediaItems);
+    }
+  }, [mediaItems]);
 
   function save() {
     saveMediaItems(items);
@@ -363,8 +462,14 @@ function MediaItemsEditor() {
 // ─── FAQs ──────────────────────────────────────────────────────────────────
 function FaqsEditor() {
   const { faqs, saveFaqs } = useAdminData();
-  const [items, setItems] = useState<FaqItem[]>(faqs);
+  const [items, setItems] = useState<FaqItem[]>([]);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (faqs && faqs.length > 0) {
+      setItems(faqs);
+    }
+  }, [faqs]);
 
   function save() {
     saveFaqs(items);

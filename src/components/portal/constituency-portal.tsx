@@ -109,7 +109,17 @@ export default function ConstituencyPortal() {
   const [portalMediaItems, setPortalMediaItems] = useState(defaultMediaItems);
   const [portalFaqs, setPortalFaqs] = useState(defaultFaqs);
 
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = window.localStorage.getItem("mp-portal-theme");
+      if (savedTheme) {
+        return savedTheme === "dark";
+      }
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      return prefersDark;
+    }
+    return false;
+  });
   const [navOpen, setNavOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -168,16 +178,8 @@ export default function ConstituencyPortal() {
     loadData();
   }, []);
 
-  // Load saved theme on mount to prevent hydration mismatch
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem("mp-portal-theme");
-    if (savedTheme) {
-      setDarkMode(savedTheme === "dark");
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setDarkMode(prefersDark);
-    }
-  }, []);
+  // Theme is initialized in useState; keep effect to sync document and storage only
+  // (avoid calling setState synchronously in effect)
 
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? "dark" : "light";
@@ -266,17 +268,6 @@ export default function ConstituencyPortal() {
           </div>
 
           <div className="hidden items-center gap-2 lg:flex">
-            <label className="flex h-11 min-w-48 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm text-[var(--muted)]">
-              <Search size={16} aria-hidden="true" />
-              <span className="sr-only">Search projects and updates</span>
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search"
-                className="w-full bg-transparent text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none"
-              />
-            </label>
-           
             <button
               type="button"
               onClick={() => setDarkMode((current) => !current)}
@@ -670,8 +661,6 @@ export default function ConstituencyPortal() {
             ))}
           </div>
         </section>
-
-
 
         <section className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
           <div>

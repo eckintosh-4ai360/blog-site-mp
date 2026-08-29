@@ -1,17 +1,3 @@
-/**
- * upload-projects.ts
- *
- * Uploads all images from public/<folder>/* to Cloudinary under the
- * mp_projects/<folder-slug> folder, then inserts each project into the
- * Neon `projects` table.
- *
- * Run with:
- *   npx ts-node --project tsconfig.node.json src/scripts/upload-projects.ts
- *   -- or via the npm script "upload-projects"
- *
- * Requires DATABASE_URL in .env.local (or system env).
- */
-
 import fs from "fs";
 import path from "path";
 import { v2 as cloudinary } from "cloudinary";

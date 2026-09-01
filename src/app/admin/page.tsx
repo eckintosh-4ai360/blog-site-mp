@@ -111,11 +111,14 @@ export default function AdminLoginPage() {
               />
               <button
                 type="button"
+                tabIndex={-1}
                 onClick={() => setShowPw((v) => !v)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition"
+                className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/40"
                 aria-label={showPw ? "Hide password" : "Show password"}
+                aria-pressed={showPw}
+                title={showPw ? "Hide password" : "Show password"}
               >
-                {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
+                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>

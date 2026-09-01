@@ -67,11 +67,12 @@ export function useAdminData() {
   const [testimonials, setTestimonialsState] = useState<Testimonial[]>([]);
   const [mediaItems, setMediaItemsState] = useState<MediaItem[]>([]);
   const [faqs, setFaqsState] = useState<FaqItem[]>([]);
+  const [categories, setCategoriesState] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     try {
-      const [p, cs, is, n, e, t, m, f] = await Promise.all([
+      const [p, cs, is, n, e, t, m, f, c] = await Promise.all([
         fetch("/api/projects").then((r) => r.json()),
         fetch("/api/stats").then((r) => r.json()),
         fetch("/api/stats?type=impact").then((r) => r.json()),
@@ -80,6 +81,7 @@ export function useAdminData() {
         fetch("/api/testimonials").then((r) => r.json()),
         fetch("/api/media").then((r) => r.json()),
         fetch("/api/faqs").then((r) => r.json()),
+        fetch("/api/categories").then((r) => r.json()),
       ]);
 
       if (Array.isArray(p)) setProjectsState(p);
@@ -90,6 +92,7 @@ export function useAdminData() {
       if (Array.isArray(t)) setTestimonialsState(t);
       if (Array.isArray(m)) setMediaItemsState(m);
       if (Array.isArray(f)) setFaqsState(f);
+      if (Array.isArray(c)) setCategoriesState(c);
     } catch (err) {
       console.error("Failed to refresh admin data from API:", err);
     } finally {
@@ -261,6 +264,19 @@ export function useAdminData() {
     }
   }, [refresh]);
 
+  /** Adds a category to the shared list and returns its canonical name. */
+  const addCategory = useCallback(async (name: string) => {
+    const res = await fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error || "Failed to save category");
+    if (Array.isArray(data?.categories)) setCategoriesState(data.categories);
+    return (data?.name as string) || name.trim();
+  }, []);
+
   const resetAll = useCallback(async () => {
     // Placeholder to match hook type
   }, []);
@@ -274,6 +290,7 @@ export function useAdminData() {
     testimonials,
     mediaItems,
     faqs,
+    categories,
     loading,
     saveProject,
     deleteProject,
@@ -284,6 +301,7 @@ export function useAdminData() {
     saveTestimonials,
     saveMediaItems,
     saveFaqs,
+    addCategory,
     resetAll,
   };
 }

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PlusCircle, Trash2, Save, ArrowLeft } from "lucide-react";
-import { categories, statuses, type Project, type ProjectStatus } from "@/lib/portal-data";
+import { PlusCircle, Trash2, Save, ArrowLeft, Check, X, Loader2 } from "lucide-react";
+import { categories as fallbackCategories, statuses, type Project, type ProjectStatus } from "@/lib/portal-data";
 import { useAdminData } from "@/lib/admin-data";
 import ImageUploadField from "./ImageUploadField";
+
+const OTHER_CATEGORY = "Other (add new)…";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 function slugify(str: string) {
@@ -19,7 +21,7 @@ function slugify(str: string) {
 const EMPTY_PROJECT: Omit<Project, "slug"> & { slug: string } = {
   slug: "",
   title: "",
-  category: categories[0],
+  category: fallbackCategories[0],
   status: "Planned",
   community: "",
   budget: 0,
@@ -187,13 +189,52 @@ type Props = {
 
 export default function ProjectForm({ initial, mode }: Props) {
   const router = useRouter();
-  const { saveProject } = useAdminData();
+  const { saveProject, categories: savedCategories, addCategory } = useAdminData();
 
   const [form, setForm] = useState<Project>(
     initial ?? (EMPTY_PROJECT as Project)
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // ── Custom category ("Other…") ──
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [categoryBusy, setCategoryBusy] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
+
+  // Saved list, falling back to the built-ins until it loads. A project's own
+  // category is always listed, even if it was removed from the shared list.
+  const categoryOptions = useMemo(() => {
+    const base = savedCategories.length > 0 ? savedCategories : fallbackCategories;
+    return form.category && !base.includes(form.category) ? [...base, form.category] : base;
+  }, [savedCategories, form.category]);
+
+  async function commitNewCategory() {
+    const name = newCategory.trim();
+    if (!name) {
+      setCategoryError("Enter a category name.");
+      return;
+    }
+    setCategoryBusy(true);
+    setCategoryError("");
+    try {
+      const saved = await addCategory(name);
+      set("category", saved);
+      setAddingCategory(false);
+      setNewCategory("");
+    } catch (err) {
+      setCategoryError(err instanceof Error ? err.message : "Could not add that category.");
+    } finally {
+      setCategoryBusy(false);
+    }
+  }
+
+  function cancelNewCategory() {
+    setAddingCategory(false);
+    setNewCategory("");
+    setCategoryError("");
+  }
 
   // ── Generic field updater ──
   function set<K extends keyof Project>(key: K, value: Project[K]) {
@@ -284,15 +325,80 @@ export default function ProjectForm({ initial, mode }: Props) {
               placeholder="auto-generated from title"
             />
           </Field>
-          <Field label="Category" required>
-            <select
-              className={inputCls}
-              value={form.category}
-              onChange={(e) => set("category", e.target.value)}
-            >
-              {categories.map((c) => <option key={c}>{c}</option>)}
-            </select>
-          </Field>
+          <div>
+            <Field label="Category" required>
+              <select
+                className={inputCls}
+                value={addingCategory ? OTHER_CATEGORY : form.category}
+                onChange={(e) => {
+                  if (e.target.value === OTHER_CATEGORY) {
+                    setAddingCategory(true);
+                    setCategoryError("");
+                    return;
+                  }
+                  setAddingCategory(false);
+                  set("category", e.target.value);
+                }}
+              >
+                {categoryOptions.map((c) => <option key={c}>{c}</option>)}
+                <option value={OTHER_CATEGORY}>{OTHER_CATEGORY}</option>
+              </select>
+            </Field>
+            {addingCategory && (
+              <div className="mt-2">
+                <div className="flex gap-2">
+                  <input
+                    autoFocus
+                    aria-label="New category name"
+                    className={inputCls}
+                    value={newCategory}
+                    maxLength={60}
+                    disabled={categoryBusy}
+                    onChange={(e) => {
+                      setNewCategory(e.target.value);
+                      setCategoryError("");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void commitNewCategory();
+                      }
+                      if (e.key === "Escape") {
+                        e.preventDefault();
+                        cancelNewCategory();
+                      }
+                    }}
+                    placeholder="New category name…"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void commitNewCategory()}
+                    disabled={categoryBusy}
+                    aria-label="Add category"
+                    className="grid h-[46px] w-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] bg-[var(--surface-soft)] text-[var(--primary)] transition hover:bg-[var(--line)] disabled:opacity-50"
+                  >
+                    {categoryBusy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelNewCategory}
+                    disabled={categoryBusy}
+                    aria-label="Cancel"
+                    className="grid h-[46px] w-11 shrink-0 place-items-center rounded-xl border border-[var(--line)] text-[var(--muted)] transition hover:bg-[var(--line)] disabled:opacity-50"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <p className="mt-1 text-[10px] font-bold text-[var(--muted)]">
+                  {categoryError ? (
+                    <span className="text-[var(--danger)]">{categoryError}</span>
+                  ) : (
+                    "Saved to the shared category list for all projects."
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
           <Field label="Status" required>
             <select
               className={inputCls}

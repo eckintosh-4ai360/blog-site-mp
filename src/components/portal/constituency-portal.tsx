@@ -186,6 +186,16 @@ export default function ConstituencyPortal() {
     window.localStorage.setItem("mp-portal-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
+  // Built-in list plus any admin-added category actually in use, so custom
+  // categories are filterable on the public portal too.
+  const categoryOptions = useMemo(
+    () =>
+      Array.from(
+        new Set([...categories, ...portalProjects.map((project) => project.category)]),
+      ).filter(Boolean),
+    [portalProjects],
+  );
+
   const communities = useMemo(
     () => Array.from(new Set(portalProjects.map((project) => project.community))).sort(),
     [portalProjects],
@@ -530,7 +540,7 @@ export default function ConstituencyPortal() {
                 className="mt-1 w-full bg-transparent text-sm font-bold text-[var(--foreground)] focus:outline-none"
               >
                 <option>All</option>
-                {categories.map((item) => (
+                {categoryOptions.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
               </select>

@@ -1,5 +1,5 @@
 
-const ADMIN_EMAIL = "eckintosh@gmail.com";
+const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_PASSWORD = "adminpassword";
 const SESSION_KEY = "mp_admin_session";
 

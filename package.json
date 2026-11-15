@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "upload-projects": "npx ts-node --esm src/scripts/upload-projects.ts",
-    "setup-db": "npx ts-node --esm src/scripts/setup-db.ts",
+    "setup-db": "tsx src/scripts/setup-db.mts",
     "extract-deck": "python src/scripts/extract-deck.py",
     "upload-deck": "npx tsx src/scripts/upload-deck-projects.mts"
   },

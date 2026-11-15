@@ -4,21 +4,21 @@ import ws from "ws";
 // Set the WebSocket constructor for local Node.js environments
 neonConfig.webSocketConstructor = ws;
 
-const connectionString = process.env.DATABASE_URL;
+let pool: Pool | undefined;
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not defined in environment variables.");
+function getPool() {
+  if (!pool) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) throw new Error("DATABASE_URL is not defined in environment variables.");
+    pool = new Pool({ connectionString, ssl: true });
+  }
+  return pool;
 }
-
-export const pool = new Pool({
-  connectionString,
-  ssl: true,
-});
 
 export async function query(text: string, params?: any[]) {
   const start = Date.now();
   try {
-    const res = await pool.query(text, params);
+    const res = await getPool().query(text, params);
     const duration = Date.now() - start;
     console.log("Executed query:", { text, duration, rows: res.rowCount });
     return res;

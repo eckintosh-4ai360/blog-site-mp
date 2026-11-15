@@ -1,21 +1,20 @@
 
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "adminpassword";
-const SESSION_KEY = "mp_admin_session";
-
-export function login(email: string, password: string): boolean {
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-    sessionStorage.setItem(SESSION_KEY, "true");
-    return true;
-  }
-  return false;
+export async function login(email: string, password: string): Promise<boolean> {
+  const response = await fetch("/api/admin/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return response.ok;
 }
 
-export function logout(): void {
-  sessionStorage.removeItem(SESSION_KEY);
+export async function logout(): Promise<void> {
+  await fetch("/api/admin/session", { method: "DELETE" });
 }
 
-export function isLoggedIn(): boolean {
-  if (typeof window === "undefined") return false;
-  return sessionStorage.getItem(SESSION_KEY) === "true";
+export async function isLoggedIn(): Promise<boolean> {
+  const response = await fetch("/api/admin/session", { cache: "no-store" });
+  if (!response.ok) return false;
+  const data = await response.json();
+  return data.authenticated === true;
 }

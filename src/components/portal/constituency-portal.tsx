@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { safeImageSrc } from "@/lib/image-helper";
+import CitizenSubmissionForm from "@/components/portal/citizen-submission-form";
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -68,7 +69,7 @@ const navItems = [
   { label: "Events", href: "#events" },
   { label: "Gallery", href: "#gallery" },
   { label: "Impact", href: "#impact" },
-  { label: "Contact", href: "#contact" },
+  { label: "Have Your Say", href: "#have-your-say" },
 ];
 
 const mobileNav = [
@@ -76,7 +77,7 @@ const mobileNav = [
   { label: "Projects", href: "#projects", icon: Folder },
   { label: "Impact", href: "#impact", icon: BarChart3 },
   { label: "News", href: "#news", icon: Newspaper },
-  { label: "Contact", href: "#contact", icon: MessageSquare },
+  { label: "Send", href: "#have-your-say", icon: MessageSquare },
 ];
 
 
@@ -133,7 +134,6 @@ export default function ConstituencyPortal() {
   const [galleryItem, setGalleryItem] =
     useState<Project["gallery"][number] | null>(null);
   const [newsletterSent, setNewsletterSent] = useState(false);
-  const [contactSent, setContactSent] = useState(false);
 
   const heroStats = useMemo(() => {
     const completedCount = portalProjects.filter((p) => p.status === "Completed").length;
@@ -240,11 +240,6 @@ export default function ConstituencyPortal() {
   function handleNewsletter(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNewsletterSent(true);
-  }
-
-  function handleContact(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setContactSent(true);
   }
 
   return (
@@ -374,6 +369,12 @@ export default function ConstituencyPortal() {
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/30 bg-white/12 px-6 text-sm font-black text-white backdrop-blur transition hover:bg-white/20"
                 >
                   Meet the MP
+                </a>
+                <a
+                  href="#have-your-say"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/30 bg-white/12 px-6 text-sm font-black text-white backdrop-blur transition hover:bg-white/20"
+                >
+                  Send a complaint, request or suggestion
                 </a>
               </div>
             </div>
@@ -1057,14 +1058,15 @@ export default function ConstituencyPortal() {
           ) : null}
         </section>
 
-        <section id="contact" className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.88fr_1.12fr] lg:px-8">
+        <section id="have-your-say" className="mx-auto grid max-w-7xl scroll-mt-24 gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.88fr_1.12fr] lg:px-8">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--primary)]">
-              Contact
+              Have your say
             </p>
             <h2 className="mt-3 text-4xl font-black text-[var(--foreground)]">
-              Constituency office.
+              Your voice reaches the constituency office.
             </h2>
+            <p className="mt-4 text-sm leading-7 text-[var(--muted)]">Report a concern, request support, or suggest an idea. Add photos or a video when they help explain it.</p>
             <div className="mt-8 grid gap-4">
               {[
                 { icon: MapPin, label: "Office Address", value: "Civic Center Road, Tarkwa Nsuaem" },
@@ -1090,44 +1092,7 @@ export default function ConstituencyPortal() {
             </div>
           </div>
 
-          <form onSubmit={handleContact} className="portal-card grid gap-4 p-5 sm:p-6">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="grid gap-2 text-sm font-bold text-[var(--foreground)]">
-                Full name
-                <input required className="h-12 rounded-lg border border-[var(--line)] bg-transparent px-4 text-sm focus:outline-none" />
-              </label>
-              <label className="grid gap-2 text-sm font-bold text-[var(--foreground)]">
-                Phone or email
-                <input required className="h-12 rounded-lg border border-[var(--line)] bg-transparent px-4 text-sm focus:outline-none" />
-              </label>
-            </div>
-            <label className="grid gap-2 text-sm font-bold text-[var(--foreground)]">
-              Topic
-              <select className="h-12 rounded-lg border border-[var(--line)] bg-transparent px-4 text-sm focus:outline-none">
-                <option>Project request</option>
-                <option>Case work</option>
-                <option>Event invitation</option>
-                <option>Media inquiry</option>
-                <option>Support / donation</option>
-              </select>
-            </label>
-            <label className="grid gap-2 text-sm font-bold text-[var(--foreground)]">
-              Message
-              <textarea required rows={6} className="rounded-lg border border-[var(--line)] bg-transparent p-4 text-sm focus:outline-none" />
-            </label>
-            <button
-              type="submit"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-6 text-sm font-black text-white"
-            >
-              Send Message
-              <ArrowRight size={16} aria-hidden="true" />
-            </button>
-            {contactSent ? (
-              <p className="text-sm font-semibold text-[var(--secondary)]">
-                Message captured for this demo.
-              </p>
-            ) : null}
-          </form>
+          <CitizenSubmissionForm />
         </section>
       </main>
 
@@ -1149,7 +1114,7 @@ export default function ConstituencyPortal() {
             </p>
           </div>
           {[
-            { title: "Quick Links", items: ["About the MP", "Projects", "Events", "Contact"] },
+            { title: "Quick Links", items: ["About the MP", "Projects", "Events", "Have Your Say"] },
             { title: "Projects", items: ["Education", "Health", "Roads", "Water"] },
             { title: "Latest News", items: ["Project Updates", "Press Releases", "Media Center", "Newsletter"] },
           ].map((group) => (
@@ -1157,7 +1122,7 @@ export default function ConstituencyPortal() {
               <h3 className="text-sm font-black text-[var(--foreground)]">{group.title}</h3>
               <div className="mt-4 grid gap-3">
                 {group.items.map((item) => (
-                  <a key={item} href="#home" className="text-sm font-semibold text-[var(--muted)] hover:text-[var(--primary)]">
+                  <a key={item} href={item === "Have Your Say" ? "#have-your-say" : "#home"} className="text-sm font-semibold text-[var(--muted)] hover:text-[var(--primary)]">
                     {item}
                   </a>
                 ))}
@@ -1171,9 +1136,9 @@ export default function ConstituencyPortal() {
       </footer>
 
       <a
-        href="#contact"
+        href="#have-your-say"
         className="fixed bottom-24 right-4 z-40 grid size-12 place-items-center rounded-full bg-[var(--accent)] text-slate-950 shadow-xl shadow-amber-950/20 lg:bottom-6"
-        aria-label="Contact the constituency office"
+        aria-label="Send a complaint, request or suggestion"
       >
         <MessageSquare size={21} aria-hidden="true" />
       </a>

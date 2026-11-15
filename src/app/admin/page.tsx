@@ -14,22 +14,27 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isLoggedIn()) router.replace("/admin/dashboard");
+    void isLoggedIn().then((authenticated) => {
+      if (authenticated) router.replace("/admin/dashboard");
+    });
   }, [router]);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
-    setTimeout(() => {
-      const ok = login(email.trim(), password);
+    try {
+      const ok = await login(email.trim(), password);
       if (ok) {
         router.replace("/admin/dashboard");
       } else {
         setError("Invalid email or password. Please try again.");
-        setLoading(false);
       }
-    }, 700);
+    } catch {
+      setError("Could not sign in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -88,7 +93,7 @@ export default function AdminLoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="eckintosh@gmail.com"
+              placeholder="you@example.com"
               className="w-full rounded-xl border border-white/15 bg-white/8 px-4 py-3.5 text-sm font-semibold text-white placeholder:text-white/30 focus:border-blue-400/60 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition"
             />
           </div>

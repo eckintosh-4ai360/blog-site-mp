@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -11,6 +11,7 @@ import {
   Shield,
   Sun,
   Moon,
+  Inbox,
 } from "lucide-react";
 import { isLoggedIn, logout } from "@/lib/admin-auth";
 
@@ -18,14 +19,19 @@ const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/projects/new", label: "New Project", icon: PlusCircle },
   { href: "/admin/dashboard?tab=page", label: "Page Details", icon: FolderOpen },
+  { href: "/admin/submissions", label: "Citizen Submissions", icon: Inbox },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn()) router.replace("/admin");
+    void isLoggedIn().then((ok) => {
+      if (ok) setAuthenticated(true);
+      else router.replace("/admin");
+    }).catch(() => router.replace("/admin"));
   }, [router]);
 
   useEffect(() => {
@@ -39,8 +45,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
+    setAuthenticated(false);
     router.replace("/admin");
   }
 
@@ -51,6 +58,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     html.setAttribute("data-theme", next);
     window.localStorage.setItem("mp-portal-theme", next);
   }
+
+  if (!authenticated) return <div className="p-8 text-sm text-[var(--muted)]">Checking admin access…</div>;
 
   return (
     <div className="admin-shell flex min-h-screen" data-admin>

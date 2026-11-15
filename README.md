@@ -1,4 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is the MP constituency portal, built with Next.js.
+
+## Citizen submissions
+
+Residents can send complaints, requests and suggestions from **Have Your Say** on the home page. They can attach up to three photos (3 MB each) and one video (10 MB). Files upload directly to Cloudinary, then the server verifies each file before saving the submission to PostgreSQL. The office can review reports and update their status at `/admin/submissions`.
+
+Copy `.env.example` to `.env.local` and set the database, Cloudinary and admin values. Keep these values on the server only; configure the same variables in the deployment environment. `ADMIN_SESSION_SECRET` should be a long random value. Then run:
+
+```bash
+npm install
+npm run setup-db
+npm run dev
+```
+
+`setup-db` creates the `citizen_submissions` table alongside the existing portal tables. Do not run it against a production database unless its seed behavior is intended. Existing records are preserved.
+
+The admin login now uses the configured `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Submissions are readable and their statuses editable only with the signed admin session cookie. Cloudinary delivery URLs are unlisted but public to anyone with the URL, so the form should not be used for highly confidential evidence without a private media delivery setup.
 
 ## Getting Started
 

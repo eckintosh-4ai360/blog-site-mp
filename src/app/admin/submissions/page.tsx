@@ -85,8 +85,8 @@ function SubmissionsContent() {
                     <span className="rounded-full bg-[var(--surface-soft)] px-3 py-1 text-xs font-black uppercase tracking-wide text-[var(--primary)]">{item.type}</span>
                     <span className="text-xs font-bold text-[var(--muted)]">TN-{String(item.id).padStart(6, "0")}</span>
                   </div>
-                  <h2 className="mt-3 text-lg font-black text-[var(--foreground)]">{item.name}</h2>
-                  <p className="mt-1 text-sm text-[var(--muted)]">{item.contact}{item.community ? ` · ${item.community}` : ""}</p>
+                  <h2 className="mt-3 text-lg font-black text-[var(--foreground)]">{item.name || "Name in voice note"}</h2>
+                  <p className="mt-1 text-sm text-[var(--muted)]">{item.contact || "Contact in voice note"}{item.community ? ` · ${item.community}` : ""}</p>
                   <p className="mt-1 text-xs text-[var(--muted)]">{new Date(item.created_at).toLocaleString("en-GH", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Accra" })}</p>
                 </div>
                 <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-[var(--muted)]">Status
@@ -95,9 +95,9 @@ function SubmissionsContent() {
                   </select>
                 </label>
               </div>
-              <p className="mt-5 whitespace-pre-wrap break-words text-sm leading-7 text-[var(--foreground)]">{item.message}</p>
+              {item.message && <p className="mt-5 whitespace-pre-wrap break-words text-sm leading-7 text-[var(--foreground)]">{item.message}</p>}
               {item.attachments.length > 0 && <div className="mt-5 flex flex-wrap gap-2 border-t border-[var(--line)] pt-4">
-                {item.attachments.map((attachment, index) => <a key={`${attachment.url}-${index}`} href={attachment.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-[var(--line)] px-3 py-2 text-xs font-bold text-[var(--primary)] hover:bg-[var(--surface-soft)]"><ExternalLink size={13} /> {attachment.type === "video" ? "Video" : `Photo ${index + 1}`} · {attachment.name}</a>)}
+                {item.attachments.map((attachment, index) => attachment.type === "audio" ? <div key={`${attachment.url}-${index}`} className="w-full rounded-xl bg-[var(--surface-soft)] p-3"><p className="mb-2 text-xs font-bold text-[var(--foreground)]">Voice message</p><audio controls preload="none" src={attachment.url} className="w-full" /><a href={attachment.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[var(--primary)]"><ExternalLink size={12} /> Open recording</a></div> : <a key={`${attachment.url}-${index}`} href={attachment.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-[var(--line)] px-3 py-2 text-xs font-bold text-[var(--primary)] hover:bg-[var(--surface-soft)]"><ExternalLink size={13} /> {attachment.type === "video" ? "Video" : `Photo ${index + 1}`} · {attachment.name}</a>)}
               </div>}
             </article>
           ))}

@@ -1066,7 +1066,7 @@ export default function ConstituencyPortal() {
             <h2 className="mt-3 text-4xl font-black text-[var(--foreground)]">
               Your voice reaches the constituency office.
             </h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--muted)]">Report a concern, request support, or suggest an idea. Add photos or a video when they help explain it.</p>
+            <p className="mt-4 text-sm leading-7 text-[var(--muted)]">Report a concern, request support, or suggest an idea. You can type, record a voice message, or add photos and video.</p>
             <div className="mt-8 grid gap-4">
               {[
                 { icon: MapPin, label: "Office Address", value: "Civic Center Road, Tarkwa Nsuaem" },

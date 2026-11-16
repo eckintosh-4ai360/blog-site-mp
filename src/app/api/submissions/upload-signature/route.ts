@@ -12,7 +12,7 @@ export async function POST() {
   }
   const timestamp = Math.floor(Date.now() / 1000);
   const folder = CITIZEN_MEDIA_FOLDER;
-  const allowedFormats = "jpg,jpeg,png,webp,gif,mp4,webm,mov";
+  const allowedFormats = "jpg,jpeg,png,webp,gif,mp4,webm,mov,ogg,m4a,mp3,aac";
   const signature = cloudinary.utils.api_sign_request({ timestamp, folder, allowed_formats: allowedFormats }, apiSecret);
   return NextResponse.json({ cloudName, apiKey, timestamp, folder, allowedFormats, signature }, { headers: { "Cache-Control": "no-store" } });
 }

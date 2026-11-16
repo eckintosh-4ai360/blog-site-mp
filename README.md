@@ -2,7 +2,7 @@ This is the MP constituency portal, built with Next.js.
 
 ## Citizen submissions
 
-Residents can send complaints, requests and suggestions from **Have Your Say** on the home page. They can attach up to three photos (3 MB each) and one video (10 MB). Files upload directly to Cloudinary, then the server verifies each file before saving the submission to PostgreSQL. The office can review reports and update their status at `/admin/submissions`.
+Residents can send complaints, requests and suggestions from **Have Your Say** on the home page. They can attach up to three photos (3 MB each), one video (10 MB), and record a voice message (up to 2 minutes, 10 MB). A voice message can replace all typed fields; residents should say their name and contact details in the recording if they want a reply. Files upload directly to Cloudinary, then the server verifies each file before saving the submission to PostgreSQL. The office can play recordings, review reports and update their status at `/admin/submissions`. Microphone access requires HTTPS or localhost and browser permission.
 
 Copy `.env.example` to `.env.local` and set the database, Cloudinary and admin values. Keep these values on the server only; configure the same variables in the deployment environment. `ADMIN_SESSION_SECRET` should be a long random value. Then run:
 

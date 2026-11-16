@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { ensureSubmissionsTable } from "@/lib/ensure-submissions-table";
 import { hasAdminSession } from "@/lib/admin-session";
 import { CITIZEN_MEDIA_FOLDER, cloudinary } from "@/lib/citizen-media";
 import { submissionTypes, type SubmissionAttachment } from "@/lib/submissions";
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    await ensureSubmissionsTable();
     const result = await query(
       `INSERT INTO citizen_submissions (type, name, contact, community, message, attachments)
        VALUES ($1, $2, $3, $4, $5, $6::jsonb) RETURNING id`,
@@ -73,6 +75,7 @@ export async function POST(request: Request) {
 export async function GET() {
   if (!(await hasAdminSession())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
+    await ensureSubmissionsTable();
     const result = await query("SELECT id, type, name, contact, community, message, attachments, status, created_at FROM citizen_submissions ORDER BY created_at DESC, id DESC");
     return NextResponse.json(result.rows, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {

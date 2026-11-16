@@ -12,7 +12,7 @@ npm run setup-db
 npm run dev
 ```
 
-`setup-db` creates the `citizen_submissions` table alongside the existing portal tables. Do not run it against a production database unless its seed behavior is intended. Existing records are preserved.
+The submission API creates its table on first use. `setup-db` also creates it alongside the existing portal tables. Do not run `setup-db` against a production database unless its seed behavior is intended. Existing records are preserved.
 
 The admin login now uses the configured `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Submissions are readable and their statuses editable only with the signed admin session cookie. Cloudinary delivery URLs are unlisted but public to anyone with the URL, so the form should not be used for highly confidential evidence without a private media delivery setup.
 

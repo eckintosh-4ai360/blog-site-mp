@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { ensureSubmissionsTable } from "@/lib/ensure-submissions-table";
 import { hasAdminSession } from "@/lib/admin-session";
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -10,6 +11,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ error: "Invalid status." }, { status: 400 });
   }
   try {
+    await ensureSubmissionsTable();
     const result = await query("UPDATE citizen_submissions SET status = $1 WHERE id = $2 RETURNING id", [body.status, id]);
     if (!result.rowCount) return NextResponse.json({ error: "Submission not found." }, { status: 404 });
     return NextResponse.json({ success: true });

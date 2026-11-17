@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { safeImageSrc } from "@/lib/image-helper";
 import CitizenSubmissionForm from "@/components/portal/citizen-submission-form";
+import SubmissionTracker from "@/components/portal/submission-tracker";
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -134,6 +135,7 @@ export default function ConstituencyPortal() {
   const [galleryItem, setGalleryItem] =
     useState<Project["gallery"][number] | null>(null);
   const [newsletterSent, setNewsletterSent] = useState(false);
+  const [latestSubmissionReference, setLatestSubmissionReference] = useState("");
 
   const heroStats = useMemo(() => {
     const completedCount = portalProjects.filter((p) => p.status === "Completed").length;
@@ -1090,9 +1092,10 @@ export default function ConstituencyPortal() {
                 );
               })}
             </div>
+            <div className="mt-6"><SubmissionTracker latestReference={latestSubmissionReference} /></div>
           </div>
 
-          <CitizenSubmissionForm />
+          <CitizenSubmissionForm onSubmitted={setLatestSubmissionReference} />
         </section>
       </main>
 

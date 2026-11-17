@@ -4,6 +4,8 @@ This is the MP constituency portal, built with Next.js.
 
 Residents can send complaints, requests and suggestions from **Have Your Say** on the home page. They can attach up to three photos (3 MB each), one video (10 MB), and record a voice message (up to 2 minutes, 10 MB). A voice message can replace all typed fields; residents should say their name and contact details in the recording if they want a reply. Files upload directly to Cloudinary, then the server verifies each file before saving the submission to PostgreSQL. The office can play recordings, review reports and update their status at `/admin/submissions`. Microphone access requires HTTPS or localhost and browser permission.
 
+Citizens can check a submission from the **Track your submission** card using the `TN-` reference they receive after sending it. The public lookup returns only its status: Received, Under review, or Resolved. The office changes the status in the admin inbox; no personal details or attachments are returned by the public lookup.
+
 Copy `.env.example` to `.env.local` and set the database and Cloudinary values. Keep these values on the server only; configure the same variables in the deployment environment. A long random `ADMIN_SESSION_SECRET` is recommended; if absent, the server uses `DATABASE_URL` to sign admin sessions. Then run:
 
 ```bash

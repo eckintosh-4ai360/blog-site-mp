@@ -29,7 +29,7 @@ const choices = [
 
 const fieldClass = "w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20";
 
-export default function CitizenSubmissionForm() {
+export default function CitizenSubmissionForm({ onSubmitted }: { onSubmitted?: (reference: string) => void }) {
   const [type, setType] = useState<SubmissionType>("complaint");
   const [photos, setPhotos] = useState<File[]>([]);
   const [video, setVideo] = useState<File | null>(null);
@@ -181,6 +181,7 @@ export default function CitizenSubmissionForm() {
       const result = await response.json().catch(() => null);
       if (!response.ok) throw new Error(result?.error || "Could not send your submission.");
       setReference(result.reference || "Received");
+      if (typeof result.reference === "string") onSubmitted?.(result.reference);
       form.reset();
       setPhotos([]);
       setVideo(null);
@@ -250,7 +251,7 @@ export default function CitizenSubmissionForm() {
         {busy ? "Sending…" : `Send ${type}`} <ArrowRight size={16} aria-hidden="true" />
       </button>
       {error && <p role="alert" className="text-sm font-semibold text-[var(--danger)]">{error}</p>}
-      {reference && <p role="status" className="flex items-center gap-2 text-sm font-semibold text-[var(--secondary)]"><CheckCircle2 size={18} /> Received. Your reference is {reference}. Please save it for follow up.</p>}
+      {reference && <div role="status" className="text-sm font-semibold text-[var(--secondary)]"><p className="flex items-center gap-2"><CheckCircle2 size={18} /> Received. Your reference is {reference}. Please save it for follow up.</p><a href="#track-submission" className="mt-2 inline-block font-black text-[var(--primary)] underline underline-offset-2">Track this submission</a></div>}
     </form>
   );
 }
